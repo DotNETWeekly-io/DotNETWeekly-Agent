@@ -1,7 +1,12 @@
+using DotNETWeeklyAgent.Models;
+using DotNETWeeklyAgent.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
+builder.Services.AddHostedService<GithubIssueOpenHostedService>();
 
 var app = builder.Build();
 
