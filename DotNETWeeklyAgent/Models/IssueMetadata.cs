@@ -8,7 +8,7 @@ public class IssueMetadata
 
     public required int Id { get; set; }
 
-    public required string Category { get; set; }
+    public required IssueCategory Category { get; set; }
 
     public required string Title { get; set; }
 

@@ -1,5 +1,7 @@
 using DotNETWeeklyAgent.Models;
+using DotNETWeeklyAgent.Options;
 using DotNETWeeklyAgent.Services;
+using DotNETWeeklyAgent.SK;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
 builder.Services.AddHostedService<GithubIssueOpenHostedService>();
+builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));
+builder.Services.Configure<GithubOptions>(builder.Configuration.GetSection("Github"));
+builder.Services.AddSemanticKernal();
 
 var app = builder.Build();
 

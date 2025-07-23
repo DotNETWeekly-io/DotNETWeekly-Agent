@@ -11,10 +11,13 @@ public class GithubIssueOpenHostedService : BackgroundService
 
     private readonly IBackgroundTaskQueue<IssueMetadata> _taskQueue;
 
-    public GithubIssueOpenHostedService(IBackgroundTaskQueue<IssueMetadata> taskQueue, ILogger<GithubIssueOpenHostedService> logger)
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public GithubIssueOpenHostedService(IBackgroundTaskQueue<IssueMetadata> taskQueue, IServiceScopeFactory serviceScopeFactory, ILogger<GithubIssueOpenHostedService> logger)
     {
         _taskQueue = taskQueue;
         _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
 
