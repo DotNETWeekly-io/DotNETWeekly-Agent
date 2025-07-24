@@ -15,8 +15,7 @@ public static class SKExtensions
         services.AddSingleton(sp =>
         {
             var azureOpenAIOptions = sp.GetRequiredService<IOptions<AzureOpenAIOptions>>().Value;
-            var kernalBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(
-                azureOpenAIOptions.ModelId, azureOpenAIOptions.Endpoint, azureOpenAIOptions.APIKey);
+            var kernalBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(azureOpenAIOptions.DeploymentName, azureOpenAIOptions.Endpoint, azureOpenAIOptions.APIKey, modelId:azureOpenAIOptions.ModelId);
             // Add github mcp server
             var githubOptions = sp.GetRequiredService<IOptions<GithubOptions>>().Value;
             var sseClientTransportOptions = new SseClientTransportOptions
@@ -29,16 +28,32 @@ public static class SKExtensions
                     { "Authorization", $"Bearer {githubOptions.PAT}" }
                 }
             };
-            McpClientOptions clientOptions = new McpClientOptions
+            McpClientOptions githubClientOptions = new McpClientOptions
             {
-                ClientInfo = new Implementation { Name = "Tool client", Version = "1.0.0" }
+                ClientInfo = new Implementation { Name = "Github Client", Version = "1.0.0" }
             };
             IClientTransport clientTransport = new SseClientTransport(sseClientTransportOptions);
-            IMcpClient mcpClient = McpClientFactory.CreateAsync(clientTransport, clientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
-            var tools = mcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            IMcpClient githubMcpClient = McpClientFactory.CreateAsync(clientTransport, githubClientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
+            var githubTools = githubMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
+            // Add FireCrawl MCP Server
+            var fireCrawlOptions = sp.GetRequiredService<IOptions<FireCrawlOptions>>().Value;
+            var fireCrawlTransportOoptions = new StdioClientTransportOptions
+            {
+                Name = "FireCrawl",
+                Command = "npx",
+                Arguments = ["-y", "firecrawl-mcp"],
+                EnvironmentVariables = new Dictionary<string, string>()
+                {
+                    {"FIRECRAWL_API_KEY", fireCrawlOptions.APIKey ! }
+                },
+            };
+            IMcpClient firecrawMcpClient = McpClientFactory.CreateAsync(new StdioClientTransport(fireCrawlTransportOoptions)).ConfigureAwait(false).GetAwaiter().GetResult();
+            var firecrawlTools = firecrawMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
             var kernal = kernalBuilder.Build();
 #pragma warning disable SKEXP0001
-            kernal.Plugins.AddFromFunctions("Github", tools.Select(tool => tool.AsKernelFunction()));
+            kernal.Plugins.AddFromFunctions("Github", githubTools.Select(tool => tool.AsKernelFunction()));
+            kernal.Plugins.AddFromFunctions("FireCrawl", firecrawlTools.Select(tool => tool.AsKernelFunction()));
 #pragma warning restore SKEXP0001
             return kernal;
         });

@@ -7,7 +7,7 @@ namespace DotNETWeeklyAgent.Controllers;
 
 
 [ApiController]
-[Route("/issue")]
+[Route("issue")]
 public class GithubIssueWebHookController : ControllerBase
 {
     private readonly IBackgroundTaskQueue<IssueMetadata> _backgroundTaskQueue;
@@ -17,7 +17,7 @@ public class GithubIssueWebHookController : ControllerBase
         _backgroundTaskQueue = backgroundTaskQueue;
     }
 
-    [HttpPost("/event")]
+    [HttpPost("event")]
     public async Task<IActionResult> Post([FromBody]IssuePayload issuePayload)
     {
         if (!issuePayload.Action.Equals("opened"))

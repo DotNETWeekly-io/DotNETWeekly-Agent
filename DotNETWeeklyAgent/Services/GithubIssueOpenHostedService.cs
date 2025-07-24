@@ -1,7 +1,12 @@
 ﻿
 using DotNETWeeklyAgent.Models;
 
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace DotNETWeeklyAgent.Services;
 
@@ -23,9 +28,21 @@ public class GithubIssueOpenHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (var task in GetIssueMetaDataAsync(stoppingToken))
+        await foreach (var issue in GetIssueMetaDataAsync(stoppingToken))
         {
-            await Task.Delay(100, stoppingToken);
+            using var scope = _serviceScopeFactory.CreateScope();
+            var sp = scope.ServiceProvider;
+            var kernal = sp.GetRequiredService<Kernel>();
+            OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+            {
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+            };
+            var chatCompletionService = kernal.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory(Prompts.IssuePersona);
+            var input = $"Can you summary this github issue? {JsonSerializer.Serialize(issue)}";
+            history.AddUserMessage(input);
+            var result = await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
+            _logger.LogInformation(result.Content);
         }
     }
 
