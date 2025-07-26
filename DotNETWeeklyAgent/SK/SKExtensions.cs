@@ -16,13 +16,14 @@ public static class SKExtensions
         {
             var azureOpenAIOptions = sp.GetRequiredService<IOptions<AzureOpenAIOptions>>().Value;
             var kernalBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(azureOpenAIOptions.DeploymentName, azureOpenAIOptions.Endpoint, azureOpenAIOptions.APIKey, modelId:azureOpenAIOptions.ModelId);
+            kernalBuilder.Services.AddLogging(service => service.AddDebug().SetMinimumLevel(LogLevel.Debug));
             // Add github mcp server
             var githubOptions = sp.GetRequiredService<IOptions<GithubOptions>>().Value;
             var sseClientTransportOptions = new SseClientTransportOptions
             {
                 Name = "GitHub",
                 Endpoint = new Uri(githubOptions.Url),
-                TransportMode = HttpTransportMode.StreamableHttp,
+                TransportMode = HttpTransportMode.AutoDetect,
                 AdditionalHeaders = new Dictionary<string, string>()
                 {
                     { "Authorization", $"Bearer {githubOptions.PAT}" }

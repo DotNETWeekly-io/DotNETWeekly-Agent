@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6 d17.14
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNETWeeklyAgent", "DotNETWeeklyAgent.csproj", "{66D85667-1949-D110-6091-C1BE0E5E9FEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAgent", "..\ConsoleAgent\ConsoleAgent.csproj", "{E9F98A9C-DFA0-4BFE-B260-C121363D4E43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{66D85667-1949-D110-6091-C1BE0E5E9FEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66D85667-1949-D110-6091-C1BE0E5E9FEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66D85667-1949-D110-6091-C1BE0E5E9FEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9F98A9C-DFA0-4BFE-B260-C121363D4E43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9F98A9C-DFA0-4BFE-B260-C121363D4E43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9F98A9C-DFA0-4BFE-B260-C121363D4E43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9F98A9C-DFA0-4BFE-B260-C121363D4E43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

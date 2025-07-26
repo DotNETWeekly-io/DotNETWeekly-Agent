@@ -16,6 +16,6 @@ public static class Prompts
         3. If the issue category is oss, the link is github repo. please get summmary of this open source repository. 
         4. If the issue category is video, please get the transcript of this video from youtube and summarize it. 
 
-        After you get the summary of the issue, please appended this summary to this issue thread. 
+        After you get the summary of the issue, please add this summary to this issue comments. pelase ignore the existing comments and just append this comment. 
         """;
 }

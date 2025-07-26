@@ -38,10 +38,13 @@ public class GithubIssueOpenHostedService : BackgroundService
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
             };
             var chatCompletionService = kernal.GetRequiredService<IChatCompletionService>();
-            var history = new ChatHistory(Prompts.IssuePersona);
-            var input = $"Can you summary this github issue? {JsonSerializer.Serialize(issue)}";
+            var history = new ChatHistory();
+            var input = $"Can you get the content summary of this web link? {issue.Link}";
             history.AddUserMessage(input);
             var result = await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
+            input = $"Can you add `{result.Content}` as comment to this github issue? owner: {issue.Organization}, repo: {issue.Repository}, issue_number: {issue.Id}";
+            history.AddUserMessage(input);
+            result = await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
             _logger.LogInformation(result.Content);
         }
     }
