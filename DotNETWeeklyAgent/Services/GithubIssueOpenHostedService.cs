@@ -25,11 +25,11 @@ public class GithubIssueOpenHostedService : BackgroundService
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await foreach (var issue in GetIssueMetaDataAsync(stoppingToken))
         {
+            _logger.LogInformation("Processing issue: {Issue}", JsonSerializer.Serialize(issue));
             using var scope = _serviceScopeFactory.CreateScope();
             var sp = scope.ServiceProvider;
             var kernal = sp.GetRequiredService<Kernel>();
@@ -39,10 +39,9 @@ public class GithubIssueOpenHostedService : BackgroundService
             };
             var chatCompletionService = kernal.GetRequiredService<IChatCompletionService>();
             var history = new ChatHistory(Prompts.IssuePersonaChinese);
-            var input = $"你能获取这个 github issue 中链接的内容，并且将它添加到 github issue 的 comment 中吗? 注意请使用中文作为总结内容 {JsonSerializer.Serialize(issue)}";
+            var input = $"你能获取这个 github issue 中链接的内容，并且将它添加到 github issue 的 comment 中吗? 注意请使用中文作为总结内容.\n {JsonSerializer.Serialize(issue)}";
             history.AddUserMessage(input);
-            var result = await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
-            _logger.LogInformation(result.Content);
+            await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
         }
     }
 

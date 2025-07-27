@@ -5,13 +5,13 @@ namespace DotNETWeeklyAgent.Models;
 public class IssueMetadata
 {
     [JsonPropertyName("owner")]
-    public required string Organization { get; set; }
+    public required string Owner { get; set; }
 
     [JsonPropertyName("repo")]
-    public required string Repository { get; set; }
+    public required string Repo { get; set; }
 
     [JsonPropertyName("issue_number")]
-    public required int Id { get; set; }
+    public required int IssueNumber { get; set; }
 
     [JsonPropertyName("category")]
     public required IssueCategory Category { get; set; }

@@ -12,9 +12,12 @@ public class WebContentService
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public WebContentService(IHttpClientFactory httpClientFactory)
+    private readonly ILogger<WebContentService> _logger;
+
+    public WebContentService(IHttpClientFactory httpClientFactory, ILogger<WebContentService> logger)
     {
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     [KernelFunction("get_web_link_content")]
@@ -27,9 +30,19 @@ public class WebContentService
         httpClient.DefaultRequestHeaders.Add("Accept",
             "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
-        var documentContentStream = await httpClient.GetStreamAsync(link);
-        var document = await Document.Html.ParseAsync(documentContentStream);
-        var doc = document.ParseArticle();
-        return doc.ToString();
+
+        try
+        {
+            var documentContentStream = await httpClient.GetStreamAsync(link);
+            var document = await Document.Html.ParseAsync(documentContentStream);
+            var doc = document.ParseArticle();
+            return doc.ToString();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get the content of {link}, exception: {exception}", link, ex.Message);
+            return "Failed to get the website content, stop proceeding.";
+        }
+        
     }
 }

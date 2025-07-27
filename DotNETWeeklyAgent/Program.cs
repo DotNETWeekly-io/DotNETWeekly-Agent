@@ -11,18 +11,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddMvc();
+
+#if DEBUG
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
+#endif
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
 builder.Services.AddHostedService<GithubIssueOpenHostedService>();
 builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));
 builder.Services.Configure<GithubOptions>(builder.Configuration.GetSection("Github"));
-builder.Services.Configure<FireCrawlOptions>(builder.Configuration.GetSection("FireCrawl"));
 builder.Services.AddGithubAPIHttpClient()
     .AddWebContentHttpClient();
 builder.Services.AddSemanticKernal();
+builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
 
 var app = builder.Build();
 
@@ -40,11 +43,14 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+#if DEBUG
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("v1/swagger.json", "My API V1");
 });
+#endif
 
 app.MapControllerRoute(
     name: "default",
