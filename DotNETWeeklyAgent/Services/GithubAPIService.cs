@@ -1,9 +1,8 @@
 ﻿using Microsoft.SemanticKernel;
+
 using System.ComponentModel;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace DotNETWeeklyAgent.Services
 {
@@ -20,25 +19,23 @@ namespace DotNETWeeklyAgent.Services
         [Description("Add comment to the github issue by ower, repo, issue_number and body")]
         public async Task AddIssueComment(string owner, string repo, int issue_number, string body)
         {
-            var client = _httpClientFactory.CreateClient();
-            var url = $"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments";
-            var payload = JsonSerializer.Serialize(new { body });
-            using var request = CreateGithubRequestMessage(url, payload);
-
+            var client = _httpClientFactory.CreateClient("GithubAPI");
+            var path = $"repos/{owner}/{repo}/issues/{issue_number}/comments";
+            var payload = new
+            {
+                body=body,
+            };
+            using var request = CreateGithubRequestMessage(path, JsonSerializer.Serialize(payload));
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            // Optionally handle response content if needed
         }
 
-        private HttpRequestMessage CreateGithubRequestMessage(string url, string jsonPayload)
+        private HttpRequestMessage CreateGithubRequestMessage(string path, string jsonPayload)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            var request = new HttpRequestMessage(HttpMethod.Post, path)
             {
                 Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
             };
-            request.Headers.Add("User-Agent", "DotNETWeeklyAgent");
-            // Add authentication header if needed, e.g.:
-            // request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "<token>");
             return request;
         }
     }

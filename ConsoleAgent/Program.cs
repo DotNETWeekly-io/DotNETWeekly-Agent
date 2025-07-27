@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Brackets;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -7,6 +9,25 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
+
+using Readability;
+
+using YoutubeTranscriptApi;
+
+//var httpClient = new HttpClient();
+//httpClient.DefaultRequestHeaders.Add("User-Agent",
+//    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36");
+
+//httpClient.DefaultRequestHeaders.Add("Accept",
+//    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+//httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.5");
+//var documentContentStream = await httpClient.GetStreamAsync("https://blog.jetbrains.com/dotnet/2025/07/15/dotinsights-july-2025/");
+//var document = await Document.Html.ParseAsync(documentContentStream);
+//var doc = document.ParseArticle();
+//var str = doc.ToString();
+
+YouTubeTranscriptApi api = new YouTubeTranscriptApi();
+var scripts = api.ListTranscripts("DpyjAKmNwpI").ToList();
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")

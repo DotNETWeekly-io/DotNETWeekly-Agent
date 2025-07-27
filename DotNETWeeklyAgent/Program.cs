@@ -1,3 +1,4 @@
+using DotNETWeeklyAgent.Extensions;
 using DotNETWeeklyAgent.Models;
 using DotNETWeeklyAgent.Options;
 using DotNETWeeklyAgent.Services;
@@ -19,6 +20,8 @@ builder.Services.AddHostedService<GithubIssueOpenHostedService>();
 builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));
 builder.Services.Configure<GithubOptions>(builder.Configuration.GetSection("Github"));
 builder.Services.Configure<FireCrawlOptions>(builder.Configuration.GetSection("FireCrawl"));
+builder.Services.AddGithubAPIHttpClient()
+    .AddWebContentHttpClient();
 builder.Services.AddSemanticKernal();
 
 var app = builder.Build();
