@@ -4,9 +4,6 @@ using DotNETWeeklyAgent.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 
-using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol;
-
 namespace DotNETWeeklyAgent.SK;
 
 public static class SKExtensions
@@ -20,9 +17,9 @@ public static class SKExtensions
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             kernalBuilder.Services.AddSingleton(loggerFactory);
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
-            var githubAPI = new GithubAPIService(httpClientFactory);
-            var webContent = new WebContentService(httpClientFactory);
-            var youtubescript = new YoutubeTranscriptService();
+            var githubAPI = new GithubAPIService(httpClientFactory, sp.GetRequiredService<ILogger<GithubAPIService>>());
+            var webContent = new WebContentService(httpClientFactory, sp.GetRequiredService<ILogger<WebContentService>>());
+            var youtubescript = new YoutubeTranscriptService(sp.GetRequiredService<ILogger<YoutubeTranscriptService>>());
             var kernal = kernalBuilder.Build();
             kernal.Plugins.AddFromObject(webContent);
             kernal.Plugins.AddFromObject(githubAPI);

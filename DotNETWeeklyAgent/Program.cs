@@ -18,6 +18,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 #endif
+builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
 builder.Services.AddHostedService<GithubIssueOpenHostedService>();
 builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));

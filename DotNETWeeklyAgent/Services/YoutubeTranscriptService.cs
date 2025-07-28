@@ -10,8 +10,8 @@ namespace DotNETWeeklyAgent.Services;
 
 public sealed class YoutubeTranscriptService
 {
-    private readonly Logger<YoutubeTranscriptService> _logger;
-    public YoutubeTranscriptService(Logger<YoutubeTranscriptService> logger)
+    private readonly ILogger<YoutubeTranscriptService> _logger;
+    public YoutubeTranscriptService(ILogger<YoutubeTranscriptService> logger)
     {
         _logger = logger;
     }

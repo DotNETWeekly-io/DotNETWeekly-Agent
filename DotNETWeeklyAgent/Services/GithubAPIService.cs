@@ -10,9 +10,12 @@ namespace DotNETWeeklyAgent.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public GithubAPIService(IHttpClientFactory httpClientFactory)
+        private readonly ILogger<GithubAPIService> _logger;
+
+        public GithubAPIService(IHttpClientFactory httpClientFactory, ILogger<GithubAPIService> logger)
         {
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         [KernelFunction("add_github_issue_comment")]
@@ -25,9 +28,17 @@ namespace DotNETWeeklyAgent.Services
             {
                 body=body,
             };
-            using var request = CreateGithubRequestMessage(path, JsonSerializer.Serialize(payload));
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+
+            try
+            {
+                using var request = CreateGithubRequestMessage(path, JsonSerializer.Serialize(payload));
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add comment to the issue {owner}/{repo}#{issue_number}", owner, repo, issue_number);
+            }
         }
 
         private HttpRequestMessage CreateGithubRequestMessage(string path, string jsonPayload)
