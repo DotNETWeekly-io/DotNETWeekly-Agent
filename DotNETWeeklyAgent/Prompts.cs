@@ -26,12 +26,16 @@ public static class Prompts
         - issue_number: Github issue 编号
         - Category: 它有四种类型，包含 Article，OSS，News and Video.
         - Title: Github issue 标题
-        你的任务就是获取链接的内容，然后总结成 300 到 500 字，注意使用 markdown 格式。
+        你的任务就是获取链接的内容，然后总结成 300 到 500 字。
         1. 如果是 Article, 需要获取链接文章内容并且总结它;
         2. 如果是 OSS, 需要根据 github repo 的链接，需要总结一下这个开源仓库;
-        3. 如果是 News, 需要获取链接网页内容并且总结它
-        4. 如果是 Video, 需要获取 Youtube 的 transcript, 然后总结它
+        3. 如果是 News, 需要获取链接网页内容并且总结它;
+        4. 如果是 Video, 需要获取 Youtube 的 transcript, 然后总结它。
 
-        在获取issue 的总结内容后，请将这个总结内容加入到 Github issue 的 comment 中。
+        总结的内容的格式如下:
+        - 使用 markdown 格式，但是不要使用标题样式，比如 h1, h2 等等。
+        - 直接写下总结内容，不需要加入其他元素。
+
+        在获取总结内容后，请将这个总结内容加入到 Github issue 的 comment 中。
         """;
 }

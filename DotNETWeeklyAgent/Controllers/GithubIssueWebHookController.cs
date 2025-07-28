@@ -26,14 +26,16 @@ public class GithubIssueWebHookController : ControllerBase
     }
 
     [HttpPost("event")]
-    public async Task<IActionResult> Post([FromBody]IssuePayload issuePayload)
+    public async Task<IActionResult> Post()
     {
-#if !DEBUG
-        if (!(await _secretTokenValidator.Validate(HttpContext, _githubOptions.SecretToken)))
+        Request.EnableBuffering();
+#if DEBUG
+        if ((await _secretTokenValidator.Validate(HttpContext, _githubOptions.SecretToken)))
         {
-            return Forbid("Invalid request.");
+            return StatusCode(StatusCodes.Status401Unauthorized);
         }
 #endif
+        IssuePayload issuePayload = await Request.ReadFromJsonAsync<IssuePayload>();
         if (!issuePayload.Action.Equals("opened"))
         {
             return NoContent();

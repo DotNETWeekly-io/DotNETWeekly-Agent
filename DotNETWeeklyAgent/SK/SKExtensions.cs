@@ -1,4 +1,6 @@
-﻿using DotNETWeeklyAgent.Options;
+﻿using Azure.Identity;
+
+using DotNETWeeklyAgent.Options;
 using DotNETWeeklyAgent.Services;
 
 using Microsoft.Extensions.Options;
@@ -13,7 +15,12 @@ public static class SKExtensions
         services.AddSingleton(sp =>
         {
             var azureOpenAIOptions = sp.GetRequiredService<IOptions<AzureOpenAIOptions>>().Value;
-            var kernalBuilder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(azureOpenAIOptions.DeploymentName, azureOpenAIOptions.Endpoint, azureOpenAIOptions.APIKey, modelId:azureOpenAIOptions.ModelId);
+            var kernalBuilder = Kernel.CreateBuilder()
+#if DEBUG
+                .AddAzureOpenAIChatCompletion(azureOpenAIOptions.DeploymentName, azureOpenAIOptions.Endpoint, azureOpenAIOptions.APIKey, modelId:azureOpenAIOptions.ModelId);
+#else
+                .AddAzureOpenAIChatCompletion(azureOpenAIOptions.DeploymentName, azureOpenAIOptions.Endpoint, new DefaultAzureCredential());   
+#endif
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             kernalBuilder.Services.AddSingleton(loggerFactory);
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
