@@ -29,8 +29,8 @@ public class GithubIssueWebHookController : ControllerBase
     public async Task<IActionResult> Post()
     {
         Request.EnableBuffering();
-#if DEBUG
-        if ((await _secretTokenValidator.Validate(HttpContext, _githubOptions.SecretToken)))
+#if !DEBUG
+        if (!(await _secretTokenValidator.Validate(HttpContext, _githubOptions.SecretToken)))
         {
             return StatusCode(StatusCodes.Status401Unauthorized);
         }
