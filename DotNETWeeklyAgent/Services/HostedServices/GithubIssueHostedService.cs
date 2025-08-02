@@ -1,5 +1,5 @@
-﻿
-using DotNETWeeklyAgent.Models;
+﻿using DotNETWeeklyAgent.Models;
+using DotNETWeeklyAgent.SK;
 
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -8,17 +8,17 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace DotNETWeeklyAgent.Services;
+namespace DotNETWeeklyAgent.Services.HostedServices;
 
-public class GithubIssueOpenHostedService : BackgroundService
+public class GithubIssueHostedService : BackgroundService
 {
-    private readonly ILogger<GithubIssueOpenHostedService> _logger;
+    private readonly ILogger<GithubIssueHostedService> _logger;
 
     private readonly IBackgroundTaskQueue<IssueMetadata> _taskQueue;
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public GithubIssueOpenHostedService(IBackgroundTaskQueue<IssueMetadata> taskQueue, IServiceScopeFactory serviceScopeFactory, ILogger<GithubIssueOpenHostedService> logger)
+    public GithubIssueHostedService(IBackgroundTaskQueue<IssueMetadata> taskQueue, IServiceScopeFactory serviceScopeFactory, ILogger<GithubIssueHostedService> logger)
     {
         _taskQueue = taskQueue;
         _logger = logger;

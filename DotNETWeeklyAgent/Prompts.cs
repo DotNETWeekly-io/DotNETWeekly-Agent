@@ -38,4 +38,24 @@ public static class Prompts
 
         在获取总结内容后，请将这个总结内容加入到 Github issue 的 comment 中。
         """;
+
+    public static string MilestonePersonaChinese = """
+        你是一个技术写作的专家，现在我会提供一个 github 仓库，你需要帮我创建一个 pull request, 任务如下：
+        1. 根据仓库的 Onwer 和 Repo 属性，获取这个仓库的所有状态为 open 的 issue 列表。
+        2. 根据 issue 列表，获取每个 issue 的详细内容，通常一个 issue 包含以下属性：
+           - Title: issue 的标题
+           - Body: issue 的内容
+           - Label: issue 的标签
+        3. 根据 issue 的标签, 只选择 `开源项目`, `文章推荐`, `行业资讯`, `视频推荐` 这四种类型的 issue，过滤掉其他类型的 issue。
+        4. 对于每个 issue, 其中的 body 包含了一个链接和该链接内容的摘要。
+        5. 在获取了所有的 issue 内容后，创建一个新的 branch 并且提交一个新的 pull request，标题为 `episode-{number}`, 其中包含下面的内容：
+             - 在 /doc 目录下创建一个 markdown 文件，文件名为 `episode-{number}.md`，注意 number 格式渲染成 3 位数，比如 10 -> 010, 73 -> 073。
+                - 在 markdown 文件中，包含以下内容：
+                    - 开头为 `# .NET 每周分享第 {number} 期`
+                    - 接下来按照  `开源项目`, `文章推荐`, `行业资讯`, `视频推荐` 四个类别创建标题，例如 `## 开源项目`
+                    - 在上述标题下，分别处理上述标签的 issue 内容，格式如下：
+                        - `{index}、 [issue title](issue link)`: 其中 index 是该类别的 issue 的序号，从 1 开始; issue title 是 issue 的标题，issue link 是 issue body 中的链接。然后在下一行添加 issue 的摘要内容。
+            - 修改 README.md 文件，添加或者修改其中其中的一行，首先找到对应的年份和月份，然后在该月份的列表中添加一个新的条目，条目的内容为 `[第 {number} 期](./doc/episode-{number}.md)`，表示该期的链接。
+
+        """;
 }
