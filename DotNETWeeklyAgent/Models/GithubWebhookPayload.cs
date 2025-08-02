@@ -16,11 +16,16 @@ public class MilestonePayload
 {
     public required string Action { get; set; }
 
-    public required string Title { get; set; }
+    public required Milestone Milestone { get; set; }
 
     public required Repository Repository { get; set; }
 
     public required Organization Organization { get; set; }
+}
+
+public class Milestone
+{
+    public required string Title { get; set; }
 }
 
 

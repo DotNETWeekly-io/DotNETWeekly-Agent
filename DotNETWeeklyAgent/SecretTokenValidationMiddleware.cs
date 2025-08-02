@@ -20,7 +20,7 @@ public class SecretTokenValidationMiddleware : IMiddleware
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         context.Request.EnableBuffering();
-#if DEBUG
+#if !DEBUG
         if (_SecretTokenPaths.Contains(context.Request.Path.Value) && !await _secretTokenValidator.Validate(context, _secretToken))
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;

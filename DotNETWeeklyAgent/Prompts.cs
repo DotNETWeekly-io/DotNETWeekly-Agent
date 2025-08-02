@@ -48,7 +48,7 @@ public static class Prompts
            - Label: issue 的标签
         3. 根据 issue 的标签, 只选择 `开源项目`, `文章推荐`, `行业资讯`, `视频推荐` 这四种类型的 issue，过滤掉其他类型的 issue。
         4. 对于每个 issue, 其中的 body 包含了一个链接和该链接内容的摘要。
-        5. 在获取了所有的 issue 内容后，创建一个新的 branch 并且提交一个新的 pull request，标题为 `episode-{number}`, 其中包含下面的内容：
+        5. 在获取了所有的 issue 内容后，创建一个新的 branch, branch 的名字采取随机的方式，然后提交一个新的 pull request，其标题为 `episode-{number}`, 其中包含下面的内容：
              - 在 /doc 目录下创建一个 markdown 文件，文件名为 `episode-{number}.md`，注意 number 格式渲染成 3 位数，比如 10 -> 010, 73 -> 073。
                 - 在 markdown 文件中，包含以下内容：
                     - 开头为 `# .NET 每周分享第 {number} 期`

@@ -33,7 +33,7 @@ public class GithubMilestoneWebHookController : ControllerBase
             return NoContent();
         }
 
-        int? number = ConvertMilestoneToNumber(milestonePayload.Title);
+        int? number = ConvertMilestoneToNumber(milestonePayload.Milestone.Title);
         if (!number.HasValue)
         {
             return BadRequest("Invalid milestone title format. Expected format: 'episode-XXX'.");
@@ -42,7 +42,7 @@ public class GithubMilestoneWebHookController : ControllerBase
         {
             Owner = milestonePayload.Organization.Login,
             Repo = milestonePayload.Repository.Name,
-            Title = milestonePayload.Title,
+            Title = milestonePayload.Milestone.Title,
             Number = number.Value,
             Year = DateTime.UtcNow.Year,
             Month = chineseMonths[DateTime.UtcNow.Month - 1],

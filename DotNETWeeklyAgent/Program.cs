@@ -6,6 +6,8 @@ using DotNETWeeklyAgent.Services;
 using DotNETWeeklyAgent.Services.HostedServices;
 using DotNETWeeklyAgent.SK;
 
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,11 +17,12 @@ builder.Services.AddMvc();
 #if DEBUG
 builder.Services.AddSwaggerGen(options =>
 {
-});
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+});
 #endif
 builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
+builder.Services.AddSingleton<IBackgroundTaskQueue<MilestoneMetadata>, BackgroundTaskQueue<MilestoneMetadata>>();
 builder.Services.AddHostedService<GithubIssueHostedService>();
 builder.Services.AddHostedService<GithubMilestoneHostedService>();
 builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));
@@ -29,6 +32,7 @@ builder.Services.AddGithubAPIHttpClient()
 builder.Services.AddIssueSemanticKernal();
 builder.Services.AddMilestoneSemanticKernal();
 builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
+builder.Services.AddTransient<SecretTokenValidationMiddleware>();
 
 var app = builder.Build();
 
@@ -40,13 +44,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseMiddleware<SecretTokenValidationMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapStaticAssets();
-app.UseMiddleware<SecretTokenValidationMiddleware>();
+//app.UseMiddleware<SecretTokenValidationMiddleware>();
 
 #if DEBUG
 app.UseSwagger();

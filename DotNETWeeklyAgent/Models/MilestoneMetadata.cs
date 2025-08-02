@@ -13,7 +13,7 @@ public class MilestoneMetadata
     [JsonPropertyName("title")]
     public required string Title { get; set; }
 
-    [JsonPropertyName("link")]
+    [JsonPropertyName("number")]
     public required int Number { get; set; }
 
     [JsonPropertyName("year")]

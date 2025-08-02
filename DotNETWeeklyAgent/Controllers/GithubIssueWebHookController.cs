@@ -14,27 +14,14 @@ public class GithubIssueWebHookController : ControllerBase
 {
     private readonly IBackgroundTaskQueue<IssueMetadata> _backgroundTaskQueue;
 
-    private readonly ISecretTokenValidator _secretTokenValidator;
-
-    private readonly GithubOptions _githubOptions;
-
-    public GithubIssueWebHookController(IBackgroundTaskQueue<IssueMetadata> backgroundTaskQueue, ISecretTokenValidator secretTokenValidator, IOptions<GithubOptions> githubOptionsAccessor)
+    public GithubIssueWebHookController(IBackgroundTaskQueue<IssueMetadata> backgroundTaskQueue)
     {
         _backgroundTaskQueue = backgroundTaskQueue;
-        _secretTokenValidator = secretTokenValidator;
-        _githubOptions = githubOptionsAccessor.Value;
     }
 
     [HttpPost("event")]
     public async Task<IActionResult> Post()
     {
-        Request.EnableBuffering();
-#if !DEBUG
-        if (!(await _secretTokenValidator.Validate(HttpContext, _githubOptions.SecretToken)))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized);
-        }
-#endif
         IssuePayload issuePayload = await Request.ReadFromJsonAsync<IssuePayload>();
         if (!issuePayload.Action.Equals("opened"))
         {

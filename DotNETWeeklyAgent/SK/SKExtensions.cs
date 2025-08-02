@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 namespace DotNETWeeklyAgent.SK;
 
@@ -53,12 +54,27 @@ public static class SKExtensions
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             kernalBuilder.Services.AddSingleton(loggerFactory);
             var kernal = kernalBuilder.Build();
-            var githubMcpClient = GithubMCP.Create(
-                    sp.GetRequiredService<IOptions<GithubOptions>>().Value,
-                loggerFactory).GetAwaiter().GetResult();
-            var tools = githubMcpClient.ListToolsAsync().GetAwaiter().GetResult();
+            // Add github mcp server
+            var githubOptions = sp.GetRequiredService<IOptions<GithubOptions>>().Value;
+            var sseClientTransportOptions = new SseClientTransportOptions
+            {
+                Name = "GitHub",
+                Endpoint = new Uri(githubOptions.MCPUrl),
+                TransportMode = HttpTransportMode.StreamableHttp,
+                AdditionalHeaders = new Dictionary<string, string>()
+                {
+                    { "Authorization", $"Bearer {githubOptions.PAT}" }
+                }
+            };
+            McpClientOptions githubClientOptions = new McpClientOptions
+            {
+                ClientInfo = new Implementation { Name = "Github Client", Version = "1.0.0" }
+            };
+            IClientTransport clientTransport = new SseClientTransport(sseClientTransportOptions);
+            IMcpClient githubMcpClient = McpClientFactory.CreateAsync(clientTransport, githubClientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
+            var githubTools = githubMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            kernal.Plugins.AddFromFunctions("githubTools", tools.Select(tool => tool.AsKernelFunction()));
+            kernal.Plugins.AddFromFunctions("githubTools", githubTools.Select(tool => tool.AsKernelFunction()));
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             return kernal;
         });
