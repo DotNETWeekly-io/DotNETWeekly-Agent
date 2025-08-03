@@ -73,11 +73,25 @@ public static class SKExtensions
             IClientTransport clientTransport = new SseClientTransport(sseClientTransportOptions);
             IMcpClient githubMcpClient = McpClientFactory.CreateAsync(clientTransport, githubClientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
             var githubTools = githubMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            var filteredGithubTools = FilterMilestoneTools(githubTools).ToList();
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-            kernal.Plugins.AddFromFunctions("githubTools", githubTools.Select(tool => tool.AsKernelFunction()));
+            kernal.Plugins.AddFromFunctions("githubTools", filteredGithubTools.Select(tool => tool.AsKernelFunction()));
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             return kernal;
         });
         return services;
+    }
+
+    private static List<McpClientTool> FilterMilestoneTools(IList<McpClientTool> tools)
+    {
+        return tools.Where(tool => tool.Name.Contains("list_issues", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("get_issue_comments", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("get_issue", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("create_branch", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("push_files", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("create_or_update_file", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("create_pull_request", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("create_pull_request_with_copilot ", StringComparison.OrdinalIgnoreCase)
+                          ).ToList();
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.SemanticKernel;
+﻿using DotNETWeeklyAgent.Models;
+
+using Microsoft.SemanticKernel;
 
 using System.ComponentModel;
 using System.Text;

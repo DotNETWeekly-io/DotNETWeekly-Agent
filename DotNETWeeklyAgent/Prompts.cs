@@ -39,23 +39,56 @@ public static class Prompts
         在获取总结内容后，请将这个总结内容加入到 Github issue 的 comment 中。
         """;
 
+
+    public static string MilestonePersona = """
+        You are an expert in technical writing. I will now provide you with a GitHub repository, and your task is to help me create a pull request. The tasks are as follows:
+        1. Based on the repository's Owner and Repo attributes, retrieve all issues from this repository that are currently in the open state.
+        2. Then, for each issue, retrieve its detailed content. Typically, an issue contains the following properties:
+            - Title: the issue title
+            - Body: contains a link and a summary of the linked content
+            - Label: the issue's labels
+
+        3. Next, filter the issues by their labels, keeping only those with the following types: 行业资讯, 文章推荐, 视频推荐, and 开源项目. Each of these filtered issues should contain a link and a summary of the link in its body.
+        4. After retrieving the detailed comments of each selected issue, create a new branch in the GitHub repository. The branch name should be generated randomly—preferably in GUID format to avoid conflicts.
+        5. Then, create a new pull request with the title `episode-{number}`, including the following content:
+            - In the `/doc` directory, create a markdown file named episode-{number}.md. The {number} should be formatted as a three-digit number, e.g., 10 → 010, 73 → 073.
+                - The markdown file should contain:
+                    - A heading: `# .NET 每周分享第 {number} 期`
+                    - Then create section headers for the four categories, like `## 开源项目`, and `## 视频推荐`
+                    - Under each section, list the issues for that category using the following format:
+                        - `{index}、 [issue title](issue link)`: where index is the sequence number within that category (starting from 1), issue title is the title of the issue, and issue link is the link extracted from the issue's body
+                        - On the next line, add the summary from the issue's body.
+           - Update the `README.md` file by adding or modifying one line. Locate the corresponding year and month, then under the list for that month, add a new entry in the following format:
+                - [第 {number} 期](./doc/episode-{number}.md) — this entry links to the markdown file for the episode.
+        -----
+        """;
+
     public static string MilestonePersonaChinese = """
-        你是一个技术写作的专家，现在我会提供一个 github 仓库，你需要帮我创建一个 pull request, 任务如下：
+        你是一个技术写作的专家，现在我会提供一个 github 仓库任务如下：
         1. 根据仓库的 Onwer 和 Repo 属性，获取这个仓库的所有状态为 open 的 issue 列表。
-        2. 根据 issue 列表，获取每个 issue 的详细内容，通常一个 issue 包含以下属性：
+        2. 然后根据 issue 列表，获取每个 issue 的 comments，通常一个 issue 包含以下属性：
            - Title: issue 的标题
-           - Body: issue 的内容
+           - Body: issue 的包含链接以及对链接内容摘要
            - Label: issue 的标签
-        3. 根据 issue 的标签, 只选择 `开源项目`, `文章推荐`, `行业资讯`, `视频推荐` 这四种类型的 issue，过滤掉其他类型的 issue。
-        4. 对于每个 issue, 其中的 body 包含了一个链接和该链接内容的摘要。
-        5. 在获取了所有的 issue 内容后，创建一个新的 branch, branch 的名字采取随机的方式，然后提交一个新的 pull request，其标题为 `episode-{number}`, 其中包含下面的内容：
-             - 在 /doc 目录下创建一个 markdown 文件，文件名为 `episode-{number}.md`，注意 number 格式渲染成 3 位数，比如 10 -> 010, 73 -> 073。
-                - 在 markdown 文件中，包含以下内容：
+        3. 接下来根据 issue 的标签, 只选择 `行业资讯`, `文章推荐`, `视频推荐`, `开源项目` 这四种类型的 issue。对于每个 issue, 其中的 body 包含了一个链接和该链接内容的摘要。
+        5. 紧接着在获取了所有的 issue 详细 comments 后，创建一个基于 master 新的 branch, branch 的名字采取随机的方式，最好是一个 guid 类型，避免冲突，主要创建和修改两个文件
+             - 在 `/doc` 目录下创建文件名为 `episode-{number}.md` 文件，注意 number 格式渲染成 3 位数，比如 10 -> 010, 73 -> 073。
+                - 在该文件中，包含以下内容：
                     - 开头为 `# .NET 每周分享第 {number} 期`
                     - 接下来按照  `开源项目`, `文章推荐`, `行业资讯`, `视频推荐` 四个类别创建标题，例如 `## 开源项目`
                     - 在上述标题下，分别处理上述标签的 issue 内容，格式如下：
-                        - `{index}、 [issue title](issue link)`: 其中 index 是该类别的 issue 的序号，从 1 开始; issue title 是 issue 的标题，issue link 是 issue body 中的链接。然后在下一行添加 issue 的摘要内容。
-            - 修改 README.md 文件，添加或者修改其中其中的一行，首先找到对应的年份和月份，然后在该月份的列表中添加一个新的条目，条目的内容为 `[第 {number} 期](./doc/episode-{number}.md)`，表示该期的链接。
-
+                        - `{index}、 [issue title](issue link)`: 其中 index 是该类别的 issue 的序号，从 1 开始; issue title 是 issue 的标题，issue link 是 issue body 中的链接
+                        - 【注意】在下一行添加 issue 的摘要内容，该内容可以从 issue 的 body 中获取。
+                     示例
+                     ```
+                     1、[.NET 7 支持 Rate Limiter](https://devblogs.microsoft.com/dotnet/announcing-rate-limiting-for-dotnet)
+                        限流是服务可靠性的一种方式，如果我们的资源不能承受巨大的请求量，需要拒绝额外的请求。在 .NET 7 中包含了内置一些 Rate Limiter ，都放在 System.Threading.RateLimiting 包中，主要有四种类型:
+                        1. Concurrency limit
+                        2. Token bucket limit
+                        3. Fixed window limit
+                        4. Sliding window limit
+                     ```
+            - 修改 `README.md` 文件，添加或者修改其中其中的一行，首先找到对应的年份和月份，然后在该月份的列表中添加一个新的条目，条目的内容为 `[第 {number} 期](./doc/episode-{number}.md)`，表示该期的链接。
+        6. 最后基于上述的内容，提交一个新的 pull request。
         """;
 }

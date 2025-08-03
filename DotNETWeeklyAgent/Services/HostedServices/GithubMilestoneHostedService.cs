@@ -32,11 +32,11 @@ public class GithubMilestoneHostedService : BackgroundService
             var kernel = sp.GetRequiredKeyedService<Kernel>(nameof(KernalType.Milestone));
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(null,true, new FunctionChoiceBehaviorOptions { AllowConcurrentInvocation = true }),
             };
             var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-            var history = new ChatHistory(Prompts.MilestonePersonaChinese);
-            var input = $"你能根据这个 github repo 的 issue, 创建一个 PR 吗？\n {JsonSerializer.Serialize(milestone)}";
+            var history = new ChatHistory("You're helpful assitance");
+            var input = $"{Prompts.MilestonePersonaChinese}你能帮我根据这个 github repo 的 issues 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}";
             history.AddUserMessage(input);
             await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernel);
         }
