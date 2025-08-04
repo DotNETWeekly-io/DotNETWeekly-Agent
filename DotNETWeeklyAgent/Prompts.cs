@@ -79,7 +79,7 @@ public static class Prompts
                     - 接下来按照 `行业资讯`, `文章推荐`, `视频推荐`, `开源项目` 四个类别创建标题，例如 `## 行业资讯`
                     - 在上述标题下，分别处理上述标签的 issue 内容，格式如下：
                         - `{index}、 [issue title](issue link)`: 其中 index 是该类别的 issue 的序号，从 1 开始; issue title 是 issue 的标题, issue link 是 issue body 中的链接
-                        - 【注意】换行并且添加 issue 的摘要内容，该内容可以从 issue 的 body 中直接获取，不需要修改。                  
+                        - **注意** 换行并且添加 issue 的摘要内容，该内容可以从 issue 的 comment 中 body 直接获取，不需要修改。                  
             - 修改 `README.md` 文件，添加或者修改其中其中的一行，首先找到对应的年份和月份，然后在该月份的列表中添加一个新的条目，条目的内容为 [第 {number} 期](./doc/episode-{number}.md)，表示该链接。
         5. 最后基于上述的内容，创建一个新的 pull request, 过程中不需要给我展示细节, 直接生成 PR。
         """;

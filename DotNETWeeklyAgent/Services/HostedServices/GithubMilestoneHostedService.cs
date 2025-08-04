@@ -2,6 +2,7 @@
 using DotNETWeeklyAgent.SK;
 
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
@@ -32,13 +33,18 @@ public class GithubMilestoneHostedService : BackgroundService
             var kernel = sp.GetRequiredKeyedService<Kernel>(nameof(KernalType.Milestone));
             OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
             {
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(null,true, new FunctionChoiceBehaviorOptions { AllowConcurrentInvocation = true }),
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
             };
-            var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-            var history = new ChatHistory("You're helpful assitance");
-            var input = $"{Prompts.MilestonePersonaChinese}你能帮我根据这个 github repo 的 issues 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}";
-            history.AddUserMessage(input);
-            await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernel);
+
+            ChatCompletionAgent agent = new()
+            {
+                Kernel = kernel,
+                Name = "MilestoneAgent",
+                Instructions = Prompts.MilestonePersonaChinese,
+                Arguments = new KernelArguments(openAIPromptExecutionSettings)
+            };
+
+            var response = await agent.InvokeAsync($"你能帮我根据这个 github repo 的 issues 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}").FirstAsync();
         }
     }
 
