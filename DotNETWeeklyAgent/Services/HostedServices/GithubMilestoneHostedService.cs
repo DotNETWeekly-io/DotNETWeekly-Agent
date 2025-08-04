@@ -36,15 +36,11 @@ public class GithubMilestoneHostedService : BackgroundService
                 FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
             };
 
-            ChatCompletionAgent agent = new()
-            {
-                Kernel = kernel,
-                Name = "MilestoneAgent",
-                Instructions = Prompts.MilestonePersonaChinese,
-                Arguments = new KernelArguments(openAIPromptExecutionSettings)
-            };
-
-            var response = await agent.InvokeAsync($"你能帮我根据这个 github repo 的 issues 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}").FirstAsync();
+            var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+            var history = new ChatHistory(Prompts.MilestonePersonaChinese);
+            var input = $"你能帮我根据这个 github repo 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}";
+            history.AddUserMessage(input);
+            await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernel);
         }
     }
 

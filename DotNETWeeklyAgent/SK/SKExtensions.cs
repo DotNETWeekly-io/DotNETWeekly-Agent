@@ -54,6 +54,8 @@ public static class SKExtensions
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             kernalBuilder.Services.AddSingleton(loggerFactory);
             var kernal = kernalBuilder.Build();
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var githubAPI = new GithubAPIService(httpClientFactory, sp.GetRequiredService<ILogger<GithubAPIService>>());
             // Add github mcp server
             var githubOptions = sp.GetRequiredService<IOptions<GithubOptions>>().Value;
             var sseClientTransportOptions = new SseClientTransportOptions
@@ -76,6 +78,7 @@ public static class SKExtensions
             var filteredGithubTools = FilterMilestoneTools(githubTools).ToList();
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             kernal.Plugins.AddFromFunctions("githubTools", filteredGithubTools.Select(tool => tool.AsKernelFunction()));
+            kernal.Plugins.AddFromObject(githubAPI);
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             return kernal;
         });
@@ -84,14 +87,12 @@ public static class SKExtensions
 
     private static List<McpClientTool> FilterMilestoneTools(IList<McpClientTool> tools)
     {
-        return tools.Where(tool => tool.Name.Contains("list_issues", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("get_issue_comments", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("get_issue", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("create_branch", StringComparison.OrdinalIgnoreCase) ||
+        return tools.Where(tool => tool.Name.Contains("create_branch", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("push_files", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_or_update_file", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_pull_request", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("create_pull_request_with_copilot ", StringComparison.OrdinalIgnoreCase)
+                                   tool.Name.Contains("create_pull_request_with_copilot ", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("get_file_contents", StringComparison.OrdinalIgnoreCase)
                           ).ToList();
     }
 }

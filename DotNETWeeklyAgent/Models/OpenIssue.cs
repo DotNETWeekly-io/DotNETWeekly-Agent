@@ -13,6 +13,8 @@ public class OpenIssue
     [JsonPropertyName("body")]
     public required string Link { get; set; }
 
+    public string Content { get; set; } = string.Empty;
+
     public IssueCategory IssueCategory => ConvertIssueCategory(Title);
 
     private static IssueCategory ConvertIssueCategory(string title)
@@ -30,10 +32,6 @@ public class OpenIssue
 
 public class IssueComment
 {
-    public int IssueNumber { get; set; }
-
     [JsonPropertyName("body")]
     public required string Comment { get; set; }
-
-    public static IssueComment Default = new IssueComment() { Comment = string.Empty, IssueNumber = 0 };
 }
