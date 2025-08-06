@@ -27,8 +27,17 @@ public class GithubMilestoneWebHookController : ControllerBase
     [HttpPost("event")]
     public async Task<IActionResult> Post()
     {
-        MilestonePayload milestonePayload = await Request.ReadFromJsonAsync<MilestonePayload>();
-        if (!milestonePayload.Action.Equals("created"))
+        MilestonePayload? milestonePayload;
+        try
+        {
+            milestonePayload = await Request.ReadFromJsonAsync<MilestonePayload>();
+        }
+        catch (Exception)
+        {
+            return NoContent();
+        }
+       
+        if (milestonePayload == null || milestonePayload.Action.Equals("created"))
         {
             return NoContent();
         }

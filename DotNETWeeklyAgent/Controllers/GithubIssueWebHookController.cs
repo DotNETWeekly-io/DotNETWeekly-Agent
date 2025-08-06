@@ -1,9 +1,7 @@
 ﻿using DotNETWeeklyAgent.Models;
-using DotNETWeeklyAgent.Options;
 using DotNETWeeklyAgent.Services;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace DotNETWeeklyAgent.Controllers;
 
@@ -22,11 +20,21 @@ public class GithubIssueWebHookController : ControllerBase
     [HttpPost("event")]
     public async Task<IActionResult> Post()
     {
-        IssuePayload issuePayload = await Request.ReadFromJsonAsync<IssuePayload>();
-        if (!issuePayload.Action.Equals("opened"))
+        IssuePayload? issuePayload;
+        try
+        {
+            issuePayload = await Request.ReadFromJsonAsync<IssuePayload>();
+        }
+        catch (Exception)
         {
             return NoContent();
         }
+
+        if (issuePayload == null || !issuePayload.Action.Equals("opened"))
+        {
+            return NoContent();
+        }
+
         IssueMetadata issueMetadata = new IssueMetadata
         {
             Owner = issuePayload.Organization.Login,
