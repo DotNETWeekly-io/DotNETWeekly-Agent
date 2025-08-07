@@ -1,0 +1,41 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: "sdk"
+      version: "9.0.302"
+  - script: dotnet build --configuration $(buildConfiguration)
+    workingDirectory: DotNETWeeklyAgent
+    displayName: "dotnet build $(buildConfiguration)"
+
+  - script: dotnet publish -c $(buildConfiguration) --self-contained true -r win-x64
+    workingDirectory: DotNETWeeklyAgent
+    displayName: "dotnet publish $(buildConfiguration)"
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: "DotNETWeeklyAgent/bin/Release/net9.0/win-x64/publish"
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: "$(Build.ArtifactStagingDirectory)/agent/$(Build.BuildId).zip"
+      replaceExistingArchive: true
+    displayName: "backend zip files"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)/agent"
+      ArtifactName: "agent"
+    displayName: "agent publish to pipeline"
