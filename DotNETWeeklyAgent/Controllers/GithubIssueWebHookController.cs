@@ -12,9 +12,12 @@ public class GithubIssueWebHookController : ControllerBase
 {
     private readonly IBackgroundTaskQueue<IssueMetadata> _backgroundTaskQueue;
 
-    public GithubIssueWebHookController(IBackgroundTaskQueue<IssueMetadata> backgroundTaskQueue)
+    private readonly ILogger<GithubIssueWebHookController> _logger;
+
+    public GithubIssueWebHookController(IBackgroundTaskQueue<IssueMetadata> backgroundTaskQueue, ILogger<GithubIssueWebHookController> logger)
     {
         _backgroundTaskQueue = backgroundTaskQueue;
+        _logger = logger;
     }
 
     [HttpPost("event")]
@@ -45,6 +48,8 @@ public class GithubIssueWebHookController : ControllerBase
             Category = ConvertIssueCategory(issuePayload.Issue.Title),
         };
         await _backgroundTaskQueue.QueueAsync(issueMetadata);
+        _logger.LogInformation("Received issue: {Owner}/{Repo}#{IssueNumber} - {Title}", 
+            issueMetadata.Owner, issueMetadata.Repo, issueMetadata.IssueNumber, issueMetadata.Title);
         return Ok();
     }
 

@@ -21,6 +21,7 @@ public sealed class YoutubeTranscriptService
     [Description("get the youtube video transcript with youtube video link")]
     public async Task<string> GetYoutbeTranscript(string link)
     {
+        _logger.LogInformation("Getting youtube video transcript for link: {link}", link);
         Uri uri = new Uri(link);
         var queryParams = HttpUtility.ParseQueryString(uri.Query);
         if (queryParams == null)
@@ -33,6 +34,7 @@ public sealed class YoutubeTranscriptService
 
         if (!string.IsNullOrWhiteSpace(id))
         {
+            _logger.LogInformation("Getting youtube video transcript for id: {id}", id);
             var stdOutBuffer = new StringBuilder();
             var stdErrBuffer = new StringBuilder();
             var result = await Cli.Wrap("./Scripts/youtube_transcript.exe")

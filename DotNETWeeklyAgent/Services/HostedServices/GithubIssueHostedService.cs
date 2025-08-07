@@ -42,6 +42,7 @@ public class GithubIssueHostedService : BackgroundService
             var input = $"你能获取这个 github issue 中链接的内容，并且将它添加到 github issue 的 comment 中吗? 注意请使用中文作为总结内容.\n {JsonSerializer.Serialize(issue)}";
             history.AddUserMessage(input);
             await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernal);
+            _logger.LogInformation("Finished processing issue: {Issue}", JsonSerializer.Serialize(issue));
         }
     }
 

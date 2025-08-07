@@ -2,7 +2,6 @@
 using DotNETWeeklyAgent.SK;
 
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
@@ -41,6 +40,7 @@ public class GithubMilestoneHostedService : BackgroundService
             var input = $"你能帮我根据这个 github repo 创建一个 PR 吗? \n {JsonSerializer.Serialize(milestone)}";
             history.AddUserMessage(input);
             await chatCompletionService.GetChatMessageContentAsync(history, executionSettings: openAIPromptExecutionSettings, kernel: kernel);
+            _logger.LogInformation("Finished processing milestone: {Milestone}", JsonSerializer.Serialize(milestone));
         }
     }
 

@@ -77,6 +77,7 @@ namespace DotNETWeeklyAgent.Services
                 });
 
             await Task.WhenAll(tasks);
+            _logger.LogInformation("Get {count} open issues and comments from {owner}/{repo}", openIssues.Count, owner, repo);
             var validate = openIssues.FirstOrDefault(issue => string.IsNullOrWhiteSpace(issue.Content));
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($".NET 每周分享第 {number} 期");
@@ -102,7 +103,9 @@ namespace DotNETWeeklyAgent.Services
                 var issue = issues[i];
                 sb.AppendLine($"{i + 1}、 [{issue.Title.Substring(prefixLength)}]({issue.Link})");
                 sb.AppendLine($"{issue.Content}");
+                sb.AppendLine(Environment.NewLine);
             }
+            sb.AppendLine(Environment.NewLine);
             return sb.ToString();
         }
 

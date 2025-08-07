@@ -20,6 +20,14 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 #endif
+
+#if !DEBUG
+builder.Logging.AddApplicationInsights(
+        configureTelemetryConfiguration: (config) =>
+            config.ConnectionString = builder.Configuration.GetConnectionString("APPLICATIONINSIGHTS_CONNECTION_STRING"),
+            configureApplicationInsightsLoggerOptions: (options) => { }
+    );
+#endif
 builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
 builder.Services.AddSingleton<IBackgroundTaskQueue<MilestoneMetadata>, BackgroundTaskQueue<MilestoneMetadata>>();

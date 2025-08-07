@@ -13,15 +13,18 @@ public class GithubMilestoneWebHookController : ControllerBase
 {
     private readonly IBackgroundTaskQueue<MilestoneMetadata> _backgroundTaskQueue;
 
+    private readonly ILogger<GithubMilestoneWebHookController> _logger;
+
     private static string[] chineseMonths = {
         "一月份", "二月份", "三月份", "四月份", "五月份", "六月份",
         "七月份", "八月份", "九月份", "十月份", "十一月份", "十二月份"
     };
 
 
-    public GithubMilestoneWebHookController(IBackgroundTaskQueue<MilestoneMetadata> backgroundTaskQueue)
+    public GithubMilestoneWebHookController(IBackgroundTaskQueue<MilestoneMetadata> backgroundTaskQueue, ILogger<GithubMilestoneWebHookController> logger)
     {
         _backgroundTaskQueue = backgroundTaskQueue;
+        _logger = logger;
     }
 
     [HttpPost("event")]
@@ -45,6 +48,7 @@ public class GithubMilestoneWebHookController : ControllerBase
         int? number = ConvertMilestoneToNumber(milestonePayload.Milestone.Title);
         if (!number.HasValue)
         {
+            _logger.LogWarning("Invalid milestone title format: {Title}. Expected format: 'episode-XXX'", milestonePayload.Milestone.Title);
             return BadRequest("Invalid milestone title format. Expected format: 'episode-XXX'.");
         }
         MilestoneMetadata milestoneMetadata = new MilestoneMetadata
@@ -57,6 +61,8 @@ public class GithubMilestoneWebHookController : ControllerBase
             Month = chineseMonths[DateTime.UtcNow.Month - 1],
         };
         await _backgroundTaskQueue.QueueAsync(milestoneMetadata);
+        _logger.LogInformation("Received milestone: {Owner}/{Repo} - {Title} (#{Number})", 
+            milestoneMetadata.Owner, milestoneMetadata.Repo, milestoneMetadata.Title, milestoneMetadata.Number);
         return Ok();
     }
 
