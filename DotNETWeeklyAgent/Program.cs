@@ -22,11 +22,7 @@ builder.Services.AddSwaggerGen(options =>
 #endif
 
 #if !DEBUG
-builder.Logging.AddApplicationInsights(
-        configureTelemetryConfiguration: (config) =>
-            config.ConnectionString = builder.Configuration.GetConnectionString("APPLICATIONINSIGHTS_CONNECTION_STRING"),
-            configureApplicationInsightsLoggerOptions: (options) => { }
-    );
+builder.Services.AddApplicationInsightsTelemetry();
 #endif
 builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
