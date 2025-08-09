@@ -22,6 +22,24 @@ namespace DotNETWeeklyAgent.Services
             _logger = logger;
         }
 
+        [KernelFunction("get_issue_link")]
+        [Description("Get link from of github issue by owner, repo and issue_number")]
+        public async Task<string> GetIssueLink(string owner, string repo, int issue_number)
+        {
+            var client = _httpClientFactory.CreateClient("GithubAPI");
+            var path = $"repos/{owner}/{repo}/issues/{issue_number}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, path);
+            var response = await client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+            var issue = JsonSerializer.Deserialize<Issue>(content);
+            if (issue == null)
+            {
+                return $"Cannot find the issue.";
+            }
+
+            return issue.Body;
+        }
+
         [KernelFunction("add_github_issue_comment")]
         [Description("Add comment to the github issue by ower, repo, issue_number and body")]
         public async Task AddIssueComment(string owner, string repo, int issue_number, string body)
