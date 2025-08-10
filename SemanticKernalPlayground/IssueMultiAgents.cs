@@ -25,13 +25,16 @@ public class IssueMultiAgents
 
     private readonly WebContentService _webContentService;
 
+    private readonly GithubAPIService _githubAPIService;
 
-    public IssueMultiAgents(IOptions<AzureOpenAIOptions> azureOpenAIOptionsAccessor, IOptions<GithubOptions> githubOptionsAccessor, ILoggerFactory loggerFactory, WebContentService webContentService)
+
+    public IssueMultiAgents(IOptions<AzureOpenAIOptions> azureOpenAIOptionsAccessor, IOptions<GithubOptions> githubOptionsAccessor, ILoggerFactory loggerFactory, WebContentService webContentService, GithubAPIService githubAPIService)
     {
         _azureOpenAIOptions = azureOpenAIOptionsAccessor.Value;
         _githubOptions = githubOptionsAccessor.Value;
         _loggerFactory = loggerFactory;
         _webContentService = webContentService;
+        _githubAPIService = githubAPIService;
     }
 
 
@@ -99,17 +102,7 @@ public class IssueMultiAgents
                     { "Authorization", $"Bearer {_githubOptions.PAT}" }
                 }
         };
-        McpClientOptions githubClientOptions = new McpClientOptions
-        {
-            ClientInfo = new Implementation { Name = "Github Client", Version = "1.0.0" }
-        };
-        IClientTransport clientTransport = new SseClientTransport(sseClientTransportOptions);
-        IMcpClient githubMcpClient = McpClientFactory.CreateAsync(clientTransport, githubClientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
-        var githubTools = githubMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-        var filteredGithubTools = githubTools.ToList();
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-        clonekernel.Plugins.AddFromFunctions("githubTools", filteredGithubTools.Select(tool => tool.AsKernelFunction()));
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+        clonekernel.Plugins.AddFromObject(_githubAPIService);
 
         OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
         {
@@ -138,7 +131,7 @@ public class IssueMultiAgents
         ChatCompletionAgent issueCommentAgent = new ChatCompletionAgent()
         {
             Name = "WebContent",
-            Instructions = "You are a web content writer. Given you a github repo issue link, please get the summary of of web link content with markdown format. Please identify the issue property: \n- owner\n- repo\n- issue_number\n- summary.",
+            Instructions = "You are a web content writer. Given you a github repo issue link, please get the summary of of web link content with markdown format, Note the summary should be Chinese. Please identify the issue property: \n- owner\n- repo\n- issue_number\n- summary.",
             Description = "An agent to get the summary of web content.",
             Kernel = cloneKernel,
             Arguments = new KernelArguments(openAIPromptExecutionSettings),
@@ -149,28 +142,7 @@ public class IssueMultiAgents
     private ChatCompletionAgent CreateIssueUpdateAgent(Kernel kernel)
     {
         var cloneKernel = kernel.Clone();
-        var sseClientTransportOptions = new SseClientTransportOptions
-        {
-            Name = "GitHub",
-            Endpoint = new Uri(_githubOptions.MCPUrl),
-            TransportMode = HttpTransportMode.StreamableHttp,
-            AdditionalHeaders = new Dictionary<string, string>()
-                {
-                    { "Authorization", $"Bearer {_githubOptions.PAT}" }
-                }
-        };
-        McpClientOptions githubClientOptions = new McpClientOptions
-        {
-            ClientInfo = new Implementation { Name = "Github Client", Version = "1.0.0" }
-        };
-        IClientTransport clientTransport = new SseClientTransport(sseClientTransportOptions);
-        IMcpClient githubMcpClient = McpClientFactory.CreateAsync(clientTransport, githubClientOptions).ConfigureAwait(false).GetAwaiter().GetResult();
-        var githubTools = githubMcpClient.ListToolsAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-        var filteredGithubTools = githubTools.ToList();
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-        cloneKernel.Plugins.AddFromFunctions("githubTools", filteredGithubTools.Select(tool => tool.AsKernelFunction()));
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
+        cloneKernel.Plugins.AddFromObject(_githubAPIService);
         OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
         {
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),

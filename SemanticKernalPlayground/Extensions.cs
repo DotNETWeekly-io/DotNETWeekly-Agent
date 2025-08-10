@@ -1,9 +1,28 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
+using System.Net.Http.Headers;
 
 namespace SemanticKernalPlayground;
 
 public static class Extensions
 {
+    public static IServiceCollection AddGithubAPIHttpClient(this IServiceCollection services)
+    {
+        services.AddHttpClient("GithubAPI")
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var githubOptions = sp.GetRequiredService<IOptions<GithubOptions>>().Value;
+                client.BaseAddress = new Uri(githubOptions.APIUrl);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", githubOptions.PAT);
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
+                client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+                client.DefaultRequestHeaders.Add("User-Agent", "DotNETWeekly-Agent");
+            });
+
+        return services;
+    }
+
     public static IServiceCollection AddWebContentHttpClient(this IServiceCollection services)
     {
         services.AddHttpClient("WebContent")

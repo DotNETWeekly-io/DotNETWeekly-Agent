@@ -25,12 +25,16 @@ services.Configure<AzureOpenAIOptions>(config.GetSection("AzureOpenAI"));
 services.Configure<GithubOptions>(config.GetSection("Github"));
 services.AddLogging(builder => builder.AddConsole());
 services.AddWebContentHttpClient();
+services.AddGithubAPIHttpClient();
+services.AddSingleton<GithubAPIService>();
+services.AddSingleton<WebContentService>();
 services.AddSingleton<SingleAgent>();
 services.AddSingleton<IssueMultiAgents>();
-services.AddSingleton<WebContentService>();
+services.AddSingleton<EpisodeMultiAgents>();
+
 
 
 var sp = services.BuildServiceProvider();
-var agent = sp.GetRequiredService<IssueMultiAgents>();
+var agent = sp.GetRequiredService<EpisodeMultiAgents>();
 
 await agent.RunAsync();
