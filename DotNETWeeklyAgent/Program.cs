@@ -33,6 +33,9 @@ builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection(
 builder.Services.Configure<GithubOptions>(builder.Configuration.GetSection("Github"));
 builder.Services.AddGithubAPIHttpClient()
     .AddWebContentHttpClient();
+builder.Services.AddSingleton<GithubAPIService>();
+builder.Services.AddSingleton<WebContentService>();
+builder.Services.AddSingleton<YoutubeTranscriptService>();
 builder.Services.AddIssueSemanticKernal();
 builder.Services.AddMilestoneSemanticKernal();
 builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
