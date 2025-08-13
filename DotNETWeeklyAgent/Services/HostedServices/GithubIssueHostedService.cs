@@ -57,13 +57,12 @@ public class GithubIssueHostedService : BackgroundService
             var sp = scope.ServiceProvider;
             var kernal = sp.GetRequiredKeyedService<Kernel>(nameof(KernalType.Issue));
 
-            var issueFetchAgent = CreateIssueFetchAgent(kernal);
             var issueSummaryAgent = CreateIssueSummaryAgent(kernal);
             var issueCommentAgent = CreateIssueCommentAgent(kernal);
             ChatHistory history = [];
 
 #pragma warning disable SKEXP0110
-            SequentialOrchestration orchestration = new(issueFetchAgent, issueSummaryAgent, issueCommentAgent)
+            SequentialOrchestration orchestration = new(issueSummaryAgent, issueCommentAgent)
             {
                 ResponseCallback = responseCallback,
             };
@@ -75,10 +74,11 @@ public class GithubIssueHostedService : BackgroundService
             repo: {issue.Repo}
             issue_number: {issue.IssueNumber}
             category: {issue.Category.ToString()}
+            link: {issue.Link}
             """;
 
             var result = await orchestration.InvokeAsync(
-        $"Can you add this summary of this issue link? {input}", runtime);
+        $"Can you add this summary of this github issue link? {input}", runtime);
 
             string output = await result.GetValueAsync(TimeSpan.FromMinutes(20));
             _logger.LogInformation($"# RESULT: {output}");
@@ -105,29 +105,6 @@ public class GithubIssueHostedService : BackgroundService
         }
     }
 
-    private ChatCompletionAgent CreateIssueFetchAgent(Kernel kernel)
-    {
-        var cloneKernel = kernel.Clone();
-        cloneKernel.Plugins.AddFromObject(_githubAPIService);
-        ChatCompletionAgent issueFetchAgent = new ChatCompletionAgent()
-        {
-            Name = "IssueFetch",
-            Instructions = """
-            你是一个 GitHub 分析师。给定一个 GitHub 仓库的 issue，包括 owner、repo 、issue_number 和 category。你的任务是获取 issue 的属性：
-            - owner
-            - repo
-            - issue_number
-            - cateogry
-            - link
-            """,
-            Description = "An agent to get an issue from body by owner, repo and issue_number.",
-            Kernel = cloneKernel,
-            Arguments = new KernelArguments(OpenAIPromptExecutionSettings),
-        };
-
-        return issueFetchAgent;
-    }
-
     private ChatCompletionAgent CreateIssueSummaryAgent(Kernel kernel)
     {
         var cloneKernel = kernel.Clone();
@@ -136,13 +113,8 @@ public class GithubIssueHostedService : BackgroundService
         ChatCompletionAgent issueSummaryAgent = new ChatCompletionAgent()
         {
             Name = "IssueSummary",
-            Instructions = """
-            你是一个技术写作专家，给定一个 GitHub 仓库的 issue，包括 owner、repo 、issue_number、category 和 link。你的任务是获取 link 的内容，并将其总结为一段总结，请注意以下几点：
-            1. 如果 issue 的 category 是 `article`、`OSS` 和 `News` ，请获取链接文章内容并进行总结。
-            2. 如果 issue 的 category 是 `video`，请获取 YouTube 的 transcript，然后进行总结。
-            3. 总结内容应使用中文，格式为 Markdown，但不要使用标题样式（如 h1、h2 等等）。
-            """,
-            Description = "An agent to create a summary based on link.",
+            Instructions = Prompts.IssueSummaryInstrution,
+            Description = "An agent to create a summary based on github issue's link.",
             Kernel = cloneKernel,
             Arguments = new KernelArguments(OpenAIPromptExecutionSettings),
         };
@@ -156,9 +128,7 @@ public class GithubIssueHostedService : BackgroundService
         ChatCompletionAgent issueCommentAgent = new ChatCompletionAgent()
         {
             Name = "IssueComment",
-            Instructions = """
-            你是一个 github 专家，给定一个 github 仓库的 issue，包含 owner, repo, issue_number 和 body, 你的任务是将这个 body 作为 github 的 comment。注意，这个 body 是这个 issue 内容的总结
-            """,
+            Instructions =Prompts.IssueCommentInstruction,
             Description = "An an agent to add an comment to github repo issue.",
             Kernel = cloneKernel,
             Arguments = new KernelArguments(OpenAIPromptExecutionSettings),
