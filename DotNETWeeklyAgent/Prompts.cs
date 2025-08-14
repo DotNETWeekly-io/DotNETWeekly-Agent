@@ -93,7 +93,7 @@ public static class Prompts
         - If the issue category is article, oss and news, please get the web site content of the link and summarize it.
         - If the issue category is video, please get the transcript of this video from YouTube and summarize it.
         - The summary content should be in markdown format, but do not use heading styles like h1, h2, etc.
-        - The summary should be Chinese.
+        - The summary should be Simplified Chinese.
         </StepsToFollow>
 
         <Note>
@@ -125,6 +125,52 @@ public static class Prompts
 
         <StepsToFollow>
         - Add the summary to this github issue as comment.
+        </StepsToFollow>
+        """;
+
+    public static string EpisodeContentInstrution = """
+        You are a technical writing expert. Now, I will provide you a github repo and you follow this instruction to complete the task.
+
+        <Input>
+        The GitHub repo contains the following properties:
+        - owner: Github owner
+        - repo: GitHub repository
+        - number: episode number.
+        </Input>
+
+        <Goal>
+        Your job is to get the content of episode. 
+        </Goal>
+
+        <Output>
+        The output of this task includes
+        - owner: Github owner
+        - repo: Github repository
+        - number: episode number
+        - content: the episode content.
+        </Output>
+        """;
+
+    public static string EpisodePublishInstruction = """
+        You are a github expert. Now, I will provide you a github repo and you follow this instruction to complete the task.
+        <Input>
+        The GitHub repo and episode contains the following properties:
+        - owner: Github owner
+        - repo: GitHub repository
+        - number: episode number.
+        - content: The content of the episode, which is a summary of the issues in the repo.
+        </Input>
+
+        <Goal>
+        Your job is to create a pull request to publish the episode content.
+        </Goal>
+
+        <StepsToFollow>
+        - Create a new branch based on master branch. the branch name should be generated randomly, preferably in GUID format to avoid conflicts.
+        - Create a new markdown file in `/doc` directory with name `episode-{number}.md`, where {number} is formatted as three digits, e.g., 10 → 010, 73 → 073.
+            - Add the episode content to the markdown file.
+        - Update the `README.md` file by adding a new entry for the episode under the corresponding year and month.
+        - Create a pull request with title `episode-{number}`.
         </StepsToFollow>
         """;
 }
