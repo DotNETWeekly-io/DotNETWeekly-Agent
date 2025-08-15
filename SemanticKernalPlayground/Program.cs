@@ -31,10 +31,12 @@ services.AddSingleton<WebContentService>();
 services.AddSingleton<SingleAgent>();
 services.AddSingleton<IssueMultiAgents>();
 services.AddSingleton<EpisodeMultiAgents>();
+services.AddSingleton<ImageService>();
+services.AddSingleton<ImagePullRequestAgent>();
 
 
 
 var sp = services.BuildServiceProvider();
-var agent = sp.GetRequiredService<EpisodeMultiAgents>();
+var agent = sp.GetRequiredService<ImagePullRequestAgent>();
 
 await agent.RunAsync();
