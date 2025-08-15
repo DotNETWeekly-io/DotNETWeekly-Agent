@@ -1,6 +1,5 @@
 ﻿using DotNETWeeklyAgent.Models;
 using DotNETWeeklyAgent.Options;
-using DotNETWeeklyAgent.SK;
 
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
@@ -54,7 +53,7 @@ public class GithubMilestoneHostedService : BackgroundService
             _logger.LogInformation("Processing milestone: {Milestone}", JsonSerializer.Serialize(milestone));
             using var scope = _serviceScopeFactory.CreateScope();
             var sp = scope.ServiceProvider;
-            var kernel = sp.GetRequiredKeyedService<Kernel>(nameof(KernalType.Milestone));
+            var kernel = sp.GetRequiredService<Kernel>();
 
             var episodeContentAgent = CreateEpisodeContentAgent(kernel);
             var episodePublishAgent = CreateEpisodePublishAgent(kernel);

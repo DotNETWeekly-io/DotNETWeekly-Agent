@@ -55,7 +55,7 @@ public class GithubIssueHostedService : BackgroundService
             _logger.LogInformation("Processing issue: {Issue}", JsonSerializer.Serialize(issue));
             using var scope = _serviceScopeFactory.CreateScope();
             var sp = scope.ServiceProvider;
-            var kernal = sp.GetRequiredKeyedService<Kernel>(nameof(KernalType.Issue));
+            var kernal = sp.GetRequiredService<Kernel>();
 
             var issueSummaryAgent = CreateIssueSummaryAgent(kernal);
             var issueCommentAgent = CreateIssueCommentAgent(kernal);

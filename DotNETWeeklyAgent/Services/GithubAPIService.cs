@@ -120,6 +120,7 @@ namespace DotNETWeeklyAgent.Services
             {
                 var issue = issues[i];
                 sb.AppendLine($"{i + 1}、 [{issue.Title.Substring(prefixLength)}]({issue.Link})");
+                sb.AppendLine();
                 sb.AppendLine($"{issue.Content}");
                 sb.AppendLine(Environment.NewLine);
             }
