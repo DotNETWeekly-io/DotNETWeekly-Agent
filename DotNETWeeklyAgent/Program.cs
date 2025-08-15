@@ -36,8 +36,7 @@ builder.Services.AddGithubAPIHttpClient()
 builder.Services.AddSingleton<GithubAPIService>();
 builder.Services.AddSingleton<WebContentService>();
 builder.Services.AddSingleton<YoutubeTranscriptService>();
-builder.Services.AddIssueSemanticKernal();
-builder.Services.AddMilestoneSemanticKernal();
+builder.Services.AddSemanticKernal();
 builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
 builder.Services.AddTransient<SecretTokenValidationMiddleware>();
 

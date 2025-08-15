@@ -40,7 +40,7 @@ public class GithubMilestoneWebHookController : ControllerBase
             return NoContent();
         }
        
-        if (milestonePayload == null || milestonePayload.Action.Equals("created"))
+        if (milestonePayload == null || !milestonePayload.Action.Equals("created"))
         {
             return NoContent();
         }
