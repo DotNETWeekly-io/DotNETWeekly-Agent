@@ -164,7 +164,7 @@ public class GithubMilestoneHostedService : BackgroundService
                                    tool.Name.Contains("push_files", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_or_update_file", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_pull_request", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("create_pull_request_with_copilot ", StringComparison.OrdinalIgnoreCase) ||
+                                   tool.Name.Contains("create_pull_request_with_copilot", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("get_file_contents", StringComparison.OrdinalIgnoreCase)
                           ).ToList();
     }
