@@ -92,6 +92,19 @@ namespace DotNETWeeklyAgent.Services
                     {
                         issue.Content = comments.First().Comment;
                     }
+
+                    path = "repos/{owner}/{repo}/contents/assets/images/issue-{issue.Number}.png?ref=master";
+                    using var imageRequest = new HttpRequestMessage(HttpMethod.Get, path);
+                    var response = await client.SendAsync(imageRequest);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var imageContent = await response.Content.ReadAsStringAsync();
+                        var imageData = JsonSerializer.Deserialize<JsonElement>(imageContent);
+                        if (imageData.TryGetProperty("download_url", out var downloadUrl))
+                        {
+                            issue.ImageUrl = downloadUrl.GetString() ?? string.Empty;
+                        }
+                    }
                 });
 
             await Task.WhenAll(tasks);
@@ -181,7 +194,6 @@ namespace DotNETWeeklyAgent.Services
             responseMessage.EnsureSuccessStatusCode();
         }
 
-
         private static string CreateEpisodeSection(List<OpenIssue> issues, string sectionName)
         {
             var sb = new StringBuilder();
@@ -196,13 +208,17 @@ namespace DotNETWeeklyAgent.Services
                 var issue = issues[i];
                 sb.AppendLine($"{i + 1}、 [{issue.Title.Substring(prefixLength)}]({issue.Link})");
                 sb.AppendLine();
+                if (!string.IsNullOrEmpty(issue.ImageUrl))
+                {
+                    sb.AppendLine($"![image]({issue.ImageUrl})");
+                }
+                sb.AppendLine();
                 sb.AppendLine($"{issue.Content}");
                 sb.AppendLine(Environment.NewLine);
             }
             sb.AppendLine(Environment.NewLine);
             return sb.ToString();
         }
-
 
         private HttpRequestMessage CreateGithubRequestMessage(string path, string jsonPayload)
         {

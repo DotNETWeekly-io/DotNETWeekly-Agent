@@ -15,6 +15,8 @@ public class OpenIssue
 
     public string Content { get; set; } = string.Empty;
 
+    public string ImageUrl { get; set; } = string.Empty;
+
     public IssueCategory IssueCategory => ConvertIssueCategory(Title);
 
     private static IssueCategory ConvertIssueCategory(string title)
