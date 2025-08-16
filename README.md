@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/tindi/DotNETWeekly/_apis/build/status%2FDotNETWeekly-io.DotNETWeekly-Agent?branchName=main)](https://dev.azure.com/tindi/DotNETWeekly/_build/latest?definitionId=13&branchName=main)
+
 # DotNETWeekly-Agent
 
 An intelligent ASP.NET Core application that integrates with Large Language Models (LLM) to automate GitHub issue management and newsletter generation for .NET Weekly.
