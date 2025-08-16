@@ -27,6 +27,8 @@ public class GithubIssueHostedService : BackgroundService
 
     private readonly YoutubeTranscriptService _youtubeTranscriptService;
 
+    private readonly ImageGenerationService _imageGenerationService;
+
     private static OpenAIPromptExecutionSettings OpenAIPromptExecutionSettings = new()
     {
         FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
@@ -38,6 +40,7 @@ public class GithubIssueHostedService : BackgroundService
         GithubAPIService githubAPIService,
         WebContentService webContentService,
         YoutubeTranscriptService youtubeTranscriptService,
+        ImageGenerationService imageGenerationService,
         ILogger<GithubIssueHostedService> logger)
     {
         _taskQueue = taskQueue;
@@ -45,6 +48,7 @@ public class GithubIssueHostedService : BackgroundService
         _githubAPIService = githubAPIService;
         _webContentService = webContentService;
         _youtubeTranscriptService = youtubeTranscriptService;
+        _imageGenerationService = imageGenerationService;
         _serviceScopeFactory = serviceScopeFactory;
     }
 
@@ -55,43 +59,15 @@ public class GithubIssueHostedService : BackgroundService
             _logger.LogInformation("Processing issue: {Issue}", JsonSerializer.Serialize(issue));
             using var scope = _serviceScopeFactory.CreateScope();
             var sp = scope.ServiceProvider;
-            var kernal = sp.GetRequiredService<Kernel>();
+            var kernel = sp.GetRequiredService<Kernel>();
 
-            var issueSummaryAgent = CreateIssueSummaryAgent(kernal);
-            var issueCommentAgent = CreateIssueCommentAgent(kernal);
-            ChatHistory history = [];
-
-#pragma warning disable SKEXP0110
-            SequentialOrchestration orchestration = new(issueSummaryAgent, issueCommentAgent)
+            if (string.Equals(issue.Action, "opened", StringComparison.OrdinalIgnoreCase))
             {
-                ResponseCallback = responseCallback,
-            };
-            InProcessRuntime runtime = new InProcessRuntime();
-            await runtime.StartAsync();
-
-            var input = $"""
-            owner: {issue.Owner} 
-            repo: {issue.Repo}
-            issue_number: {issue.IssueNumber}
-            category: {issue.Category.ToString()}
-            link: {issue.Link}
-            """;
-
-            var result = await orchestration.InvokeAsync(
-        $"Can you add this summary of this github issue link? {input}", runtime);
-
-            string output = await result.GetValueAsync(TimeSpan.FromMinutes(20));
-            _logger.LogInformation($"# RESULT: {output}");
-            _logger.LogInformation("ORCHESTRATION HISTORY");
-            foreach (ChatMessageContent message in history)
-            {
-                _logger.LogInformation(message.Content);
+                await ProcessIssueCreation(kernel, issue);
             }
-#pragma warning restore SKEXP0110
-            ValueTask responseCallback(ChatMessageContent response)
+            else if (string.Equals(issue.Action, "labeled", StringComparison.OrdinalIgnoreCase))
             {
-                history.Add(response);
-                return ValueTask.CompletedTask;
+                 await ProcessImageGeneration(kernel, issue);
             }
         }
     }
@@ -102,6 +78,68 @@ public class GithubIssueHostedService : BackgroundService
         {
             IssueMetadata issueMetadata = await _taskQueue.DequeueAsync(token);
             yield return issueMetadata;
+        }
+    }
+
+    private async Task ProcessImageGeneration(Kernel kernel, IssueMetadata issue)
+    {
+        var cloneKernel = kernel.Clone();
+        cloneKernel.Plugins.AddFromObject(_imageGenerationService);
+        cloneKernel.Plugins.AddFromObject(_githubAPIService);
+        ChatCompletionAgent agnet = new ChatCompletionAgent()
+        {
+            Name = "PullRequestImageGenerationAgent",
+            Instructions = Prompts.ImageGenerateInstruction,
+            Description = "An agent to generate an image based on issue's title and create a pull request.",
+            Kernel = cloneKernel,
+            Arguments = new KernelArguments(OpenAIPromptExecutionSettings),
+        };
+
+        var input = $"""
+            owner: {issue.Owner} 
+            repo: {issue.Repo}
+            issue_number: {issue.IssueNumber}
+            """;
+
+        var result = await agnet.InvokeAsync(
+            $"Can you generate an image for the following description and create a pull request to the GitHub repository? {input}").FirstAsync();
+
+    }
+
+    private async Task ProcessIssueCreation(Kernel kernel, IssueMetadata issue)
+    {
+        var issueSummaryAgent = CreateIssueSummaryAgent(kernel);
+        var issueCommentAgent = CreateIssueCommentAgent(kernel);
+        ChatHistory history = [];
+        SequentialOrchestration orchestration = new(issueSummaryAgent, issueCommentAgent)
+        {
+            ResponseCallback = responseCallback,
+        };
+        InProcessRuntime runtime = new InProcessRuntime();
+        await runtime.StartAsync();
+
+        var input = $"""
+            owner: {issue.Owner} 
+            repo: {issue.Repo}
+            issue_number: {issue.IssueNumber}
+            category: {issue.Category.ToString()}
+            link: {issue.Link}
+            """;
+
+        var result = await orchestration.InvokeAsync(
+    $"Can you add this summary of this github issue link? {input}", runtime);
+
+        string output = await result.GetValueAsync(TimeSpan.FromMinutes(20));
+        _logger.LogInformation($"# RESULT: {output}");
+        _logger.LogInformation("ORCHESTRATION HISTORY");
+        foreach (ChatMessageContent message in history)
+        {
+            _logger.LogInformation(message.Content);
+        }
+        ValueTask responseCallback(ChatMessageContent response)
+        {
+            history.Add(response);
+            return ValueTask.CompletedTask;
         }
     }
 

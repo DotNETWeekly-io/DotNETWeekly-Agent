@@ -1,4 +1,6 @@
-﻿namespace DotNETWeeklyAgent.Models;
+﻿using System.Reflection.Emit;
+
+namespace DotNETWeeklyAgent.Models;
 
 public class IssuePayload
 {
@@ -9,6 +11,8 @@ public class IssuePayload
     public required Repository Repository { get; set; }
 
     public required Organization Organization { get; set; }
+
+    public Label? Label { get; set; }
 
 }
 
@@ -26,6 +30,11 @@ public class MilestonePayload
 public class Milestone
 {
     public required string Title { get; set; }
+}
+
+public class Label
+{
+    public required string Name { get; set; }
 }
 
 

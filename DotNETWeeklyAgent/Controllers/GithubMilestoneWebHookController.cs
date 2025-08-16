@@ -39,7 +39,7 @@ public class GithubMilestoneWebHookController : ControllerBase
         {
             return NoContent();
         }
-       
+
         if (milestonePayload == null || !milestonePayload.Action.Equals("created"))
         {
             return NoContent();
@@ -61,7 +61,7 @@ public class GithubMilestoneWebHookController : ControllerBase
             Month = chineseMonths[DateTime.UtcNow.Month - 1],
         };
         await _backgroundTaskQueue.QueueAsync(milestoneMetadata);
-        _logger.LogInformation("Received milestone: {Owner}/{Repo} - {Title} (#{Number})", 
+        _logger.LogInformation("Received milestone: {Owner}/{Repo} - {Title} (#{Number})",
             milestoneMetadata.Owner, milestoneMetadata.Repo, milestoneMetadata.Title, milestoneMetadata.Number);
         return Ok();
     }

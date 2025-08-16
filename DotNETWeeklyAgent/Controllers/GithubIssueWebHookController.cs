@@ -33,13 +33,14 @@ public class GithubIssueWebHookController : ControllerBase
             return NoContent();
         }
 
-        if (issuePayload == null || !issuePayload.Action.Equals("opened"))
+        if (!CanIssueProceed(issuePayload))
         {
             return NoContent();
         }
 
         IssueMetadata issueMetadata = new IssueMetadata
         {
+            Action = issuePayload.Action,
             Owner = issuePayload.Organization.Login,
             Repo = issuePayload.Repository.Name,
             IssueNumber = issuePayload.Issue.Number,
@@ -62,6 +63,16 @@ public class GithubIssueWebHookController : ControllerBase
             var t when t.Contains("视频推荐") => IssueCategory.Video,
             var t when t.Contains("行业资讯") => IssueCategory.News,
             _ => IssueCategory.None,
+        };
+    }
+
+    private bool CanIssueProceed(IssuePayload? issuePayload)
+    {
+        return issuePayload switch
+        {
+            { Action: "opened" } => true,
+            { Action: "labeled" } and { Label.Name : "ImageRequired" } => true,
+            _ => false
         };
     }
 }

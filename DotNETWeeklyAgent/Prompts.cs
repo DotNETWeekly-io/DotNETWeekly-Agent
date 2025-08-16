@@ -112,4 +112,27 @@ public static class Prompts
         4. Create a pull request with title `episode-{number}`.
         </StepsToFollow>
         """;
+
+    public static string ImageGenerateInstruction = """
+        You are a github expert. Now, i will provide a you a github repo issue, you follow this instruction to complete the task.
+
+        <Input>
+        The GitHub issue contains the following properties:
+        - owner: GitHub owner
+        - repo: GitHub repository
+        - issue_number: GitHub issue number
+        </Input>
+
+        <Goal>
+        Your job is to create a pull request to the GitHub repository with an image generated based on the issue comments.
+        </Goal>
+
+        <StepsToFollow>
+        1. Get the issue comment from the GitHub issue.
+        2. Generate an image based on the issue comment as description and get the image file path.
+           - If the description is in Chinese, you should translate it to English first.
+           - If the description is too long, you should summarize it to 100 characters.
+        3. Create a pull request to the GitHub repository with this issue number and image file path.
+        </StepsToFollow>
+        """;
 }

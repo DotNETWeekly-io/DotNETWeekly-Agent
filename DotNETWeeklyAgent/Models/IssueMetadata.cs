@@ -4,6 +4,9 @@ namespace DotNETWeeklyAgent.Models;
 
 public class IssueMetadata
 {
+    [JsonPropertyName("action")]
+    public required string Action { get; set; }
+
     [JsonPropertyName("owner")]
     public required string Owner { get; set; }
 

@@ -31,11 +31,14 @@ builder.Services.AddHostedService<GithubIssueHostedService>();
 builder.Services.AddHostedService<GithubMilestoneHostedService>();
 builder.Services.Configure<AzureOpenAIOptions>(builder.Configuration.GetSection("AzureOpenAI"));
 builder.Services.Configure<GithubOptions>(builder.Configuration.GetSection("Github"));
+builder.Services.Configure<TinyPNGOptions>(builder.Configuration.GetSection("TinyPNG"));
 builder.Services.AddGithubAPIHttpClient()
     .AddWebContentHttpClient();
 builder.Services.AddSingleton<GithubAPIService>();
 builder.Services.AddSingleton<WebContentService>();
 builder.Services.AddSingleton<YoutubeTranscriptService>();
+builder.Services.AddSingleton<ImageGenerationService>();
+builder.Services.AddSingleton<TinyPNGCompressService>();
 builder.Services.AddSemanticKernal();
 builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
 builder.Services.AddTransient<SecretTokenValidationMiddleware>();

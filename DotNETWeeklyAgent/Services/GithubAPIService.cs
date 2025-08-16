@@ -106,6 +106,81 @@ namespace DotNETWeeklyAgent.Services
             return sb.ToString();
         }
 
+        [KernelFunction("get_issue_comment")]
+        [Description("get the issue comment by github ower, repo and issue_number")]
+        public async Task<string> GetIssueComment(string owner, string repo, int issue_number)
+        {
+            var client = _httpClientFactory.CreateClient("GithubAPI");
+            var path = $"repos/{owner}/{repo}/issues/{issue_number}/comments";
+            using var request = new HttpRequestMessage(HttpMethod.Get, path);
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var comments = JsonSerializer.Deserialize<List<IssueComment>>(content);
+            if (comments != null && comments.Count > 0)
+            {
+                return comments.First().Comment;
+            }
+            return string.Empty;
+        }
+
+        [KernelFunction("create_pull_request_to_add_image")]
+        [Description("Create a github pull request to add an image to this github repo with this issue number")]
+        public async Task CreatePullRequestToAddImage(string owner, string repo, int issue_number, string imageFilePath)
+        {
+            var client = _httpClientFactory.CreateClient("GithubAPI");
+            _logger.LogInformation("Getting the latest master commit SHA for {owner}/{repo}", owner, repo);
+            var uri = $"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/master";
+            var response = await client.GetStringAsync(uri);
+            using var doc = JsonDocument.Parse(response);
+            var commitSha = doc.RootElement.GetProperty("object").GetProperty("sha").GetString();
+
+            _logger.LogInformation("creating a new branch");
+            var branch = $"imge-{Guid.NewGuid()}";
+            var createRef = new
+            {
+                @ref = $"refs/heads/{branch}",
+                sha = commitSha
+            };
+            var responseMessage = await client.PostAsync(
+           $"https://api.github.com/repos/{owner}/{repo}/git/refs",
+           new StringContent(JsonSerializer.Serialize(createRef), Encoding.UTF8, "application/json")
+            );
+            responseMessage.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Uploading the image file.");
+            var imageFileName = Path.GetFileName(imageFilePath);
+            var base64Image = Convert.ToBase64String(File.ReadAllBytes(imageFilePath));
+            var putFile = new
+            {
+                message = $"Add {imageFileName}",
+                content = base64Image,
+                branch = branch,
+                commiter = new { name = "gaufung", email = "gaufung@outlook.com" }
+            };
+
+            responseMessage = await client.PutAsync(
+            $"https://api.github.com/repos/{owner}/{repo}/contents/assets/images/{imageFileName}",
+            new StringContent(JsonSerializer.Serialize(putFile), Encoding.UTF8, "application/json")
+            );
+            responseMessage.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Creating pull request");
+            var pr = new
+            {
+                title = $"Add image {imageFileName}",
+                head = branch,
+                @base = "master",
+                body = $"This PR adds the image {imageFileName} to the repository.",
+            };
+
+            responseMessage = await client.PostAsync(
+                $"https://api.github.com/repos/{owner}/{repo}/pulls",
+                new StringContent(JsonSerializer.Serialize(pr), Encoding.UTF8, "application/json")
+                );
+            responseMessage.EnsureSuccessStatusCode();
+        }
+
 
         private static string CreateEpisodeSection(List<OpenIssue> issues, string sectionName)
         {
