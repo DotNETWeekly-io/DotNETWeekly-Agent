@@ -108,8 +108,8 @@ public class GithubIssueHostedService : BackgroundService
 
     private async Task ProcessIssueCreation(Kernel kernel, IssueMetadata issue)
     {
-        var issueSummaryAgent = CreateIssueSummaryAgent(kernel);
-        var issueCommentAgent = CreateIssueCommentAgent(kernel);
+        ChatCompletionAgent issueSummaryAgent = CreateIssueSummaryAgent(kernel);
+        ChatCompletionAgent issueCommentAgent = CreateIssueCommentAgent(kernel);
         ChatHistory history = [];
         SequentialOrchestration orchestration = new(issueSummaryAgent, issueCommentAgent)
         {

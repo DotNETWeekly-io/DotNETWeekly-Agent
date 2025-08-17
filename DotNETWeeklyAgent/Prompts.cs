@@ -2,16 +2,6 @@
 
 public static class Prompts
 {
-    public static string MilestonePersonaChinese = """
-        你是一个技术写作的专家，现在我会提供一个 github 仓库
-        任务如下：
-        1. 根据仓库的 owner, repo 和一个 number 属性，获取 episode 的内容。
-        2. 创建一个基于 master 新的 branch, branch 的名字采取随机的方式，最好是一个 guid 类型，避免冲突，主要创建和修改两个文件
-            - 在 `/doc` 目录下创建文件名为 `episode-{number}.md` 文件，内容为第一步创建的结果，{number} 需要格式化为三位数，比如 10 → 010, 73 → 073
-            - 修改 `README.md` 文件，添加或者修改其中其中的一行，首先找到对应的年份和月份，然后在该月份的列表中添加一个新的条目，条目的内容为 [第 {number} 期](./doc/episode-{number}.md)，表示该链接。
-        5. 最后基于上述修改的内容，创建一个新的 pull request。
-        """;
-
     public static string IssueSummaryInstrution = """
         You are an expert in technical writing. Now, I will provide you with a GitHub issue context and you follow this instruction to complete the task.
 
