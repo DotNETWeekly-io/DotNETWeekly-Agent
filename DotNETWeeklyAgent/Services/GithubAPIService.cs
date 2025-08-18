@@ -93,7 +93,7 @@ namespace DotNETWeeklyAgent.Services
                         issue.Content = comments.First().Comment;
                     }
 
-                    path = "repos/{owner}/{repo}/contents/assets/images/issue-{issue.Number}.png?ref=master";
+                    path = $"repos/{owner}/{repo}/contents/assets/images/issue-{issue.Number}.png?ref=master";
                     using var imageRequest = new HttpRequestMessage(HttpMethod.Get, path);
                     var response = await client.SendAsync(imageRequest);
                     if (response.IsSuccessStatusCode)
@@ -212,11 +212,10 @@ namespace DotNETWeeklyAgent.Services
                 {
                     sb.AppendLine($"![image]({issue.ImageUrl})");
                 }
-                sb.AppendLine();
                 sb.AppendLine($"{issue.Content}");
-                sb.AppendLine(Environment.NewLine);
+                sb.AppendLine();
             }
-            sb.AppendLine(Environment.NewLine);
+            sb.AppendLine();
             return sb.ToString();
         }
 
