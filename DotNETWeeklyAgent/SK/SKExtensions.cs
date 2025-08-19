@@ -14,7 +14,7 @@ namespace DotNETWeeklyAgent.SK;
 
 public static class SKExtensions
 {
-    public static IServiceCollection AddSemanticKernal(this IServiceCollection services)
+    public static IServiceCollection AddSemanticKernel(this IServiceCollection services)
     {
         services.AddSingleton(sp =>
         {
@@ -27,8 +27,8 @@ public static class SKExtensions
 #endif
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             kernalBuilder.Services.AddSingleton(loggerFactory);
-            var kernal = kernalBuilder.Build();
-            return kernal;
+            var kernel = kernalBuilder.Build();
+            return kernel;
         });
         return services;
     }

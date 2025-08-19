@@ -39,7 +39,7 @@ builder.Services.AddSingleton<WebContentService>();
 builder.Services.AddSingleton<YoutubeTranscriptService>();
 builder.Services.AddSingleton<ImageGenerationService>();
 builder.Services.AddSingleton<TinyPNGCompressService>();
-builder.Services.AddSemanticKernal();
+builder.Services.AddSemanticKernel();
 builder.Services.AddSingleton<ISecretTokenValidator, SecretTokenValidator>();
 builder.Services.AddTransient<SecretTokenValidationMiddleware>();
 
