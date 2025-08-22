@@ -1,4 +1,4 @@
-﻿namespace DotNETWeeklyAgent;
+namespace DotNETWeeklyAgent;
 
 public static class Prompts
 {
@@ -97,7 +97,7 @@ public static class Prompts
         <StepsToFollow>
         1. Create a new branch based on master branch. the branch name should be generated randomly, preferably in GUID format to avoid conflicts.
         2. Create a new markdown file in `/doc` directory with name `episode-{number}.md`, where {number} is formatted as three digits, e.g., 10 → 010, 73 → 073.
-            - Add the episode content to the markdown file. Keep the content as it is, without any modifications.
+            - Add the episode content to the markdown file. Keep the content as it is, without any modifications, no summary or reduction. 
         3. Update the `README.md` file by adding a new entry for the episode under the corresponding year and month.
         4. Create a pull request with title `episode-{number}`.
         </StepsToFollow>
