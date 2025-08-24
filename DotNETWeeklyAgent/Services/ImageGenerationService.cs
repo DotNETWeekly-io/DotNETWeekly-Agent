@@ -48,7 +48,7 @@ public class ImageGenerationService
         _logger.LogInformation("Generating image");
         GeneratedImage image = await imageClient.GenerateImageAsync(description, options);
         string path = $"{Path.GetTempPath()}/issue-{issue_number}-original.png";
-        if (Directory.Exists(path))
+        if (File.Exists(path))
         {
             File.Delete(path);
         }

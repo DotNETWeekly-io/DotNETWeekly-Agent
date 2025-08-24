@@ -63,8 +63,8 @@ namespace DotNETWeeklyAgent.Services
             }
         }
 
-        [KernelFunction("get_episode_content")]
-        [Description("Get the content of an episode by github owner, repo and episode number")]
+        [KernelFunction("get_episode_content_file")]
+        [Description("Get the episode content file path by github owner, repo and episode number")]
         public async Task<string> GetEpisodeContent(string owner, string repo, int number)
         {
             var client = _httpClientFactory.CreateClient("GithubAPI");
@@ -116,7 +116,71 @@ namespace DotNETWeeklyAgent.Services
             sb.AppendLine(CreateEpisodeSection(openIssues.Where(issue => issue.IssueCategory == IssueCategory.Article).ToList(), "文章推荐"));
             sb.AppendLine(CreateEpisodeSection(openIssues.Where(issue => issue.IssueCategory == IssueCategory.Video).ToList(), "视频推荐"));
             sb.AppendLine(CreateEpisodeSection(openIssues.Where(issue => issue.IssueCategory == IssueCategory.OSS).ToList(), "开源项目"));
-            return sb.ToString();
+            
+            string episodePath = $"{Path.GetTempPath()}/episode-{number}.md";
+            if (File.Exists(episodePath))
+            {
+                File.Delete(episodePath);
+            }
+            File.WriteAllText(episodePath, sb.ToString());
+            return episodePath;
+        }
+
+        [KernelFunction("create_episode_content_pull_request")]
+        [Description("Create a github pull request to add the episode content file by repo's owner, repo name, episode number and episode file path. Then return the branch.")]
+        public async Task<string> CreateEpisodeContentPullRequest(string owner, string repo, string number, string filePath)
+        {
+            var client = _httpClientFactory.CreateClient("GithubAPI");
+            _logger.LogInformation("Getting the latest master commit SHA for {owner}/{repo}", owner, repo);
+            var uri = $"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/master";
+            var response = await client.GetStringAsync(uri);
+            using var doc = JsonDocument.Parse(response);
+            var commitSha = doc.RootElement.GetProperty("object").GetProperty("sha").GetString();
+            _logger.LogInformation("creating a new branch");
+            var branch = $"episode-{Guid.NewGuid()}";
+            var createRef = new
+            {
+                @ref = $"refs/heads/{branch}",
+                sha = commitSha
+            };
+            var responseMessage = await client.PostAsync(
+           $"https://api.github.com/repos/{owner}/{repo}/git/refs",
+           new StringContent(JsonSerializer.Serialize(createRef), Encoding.UTF8, "application/json")
+            );
+            responseMessage.EnsureSuccessStatusCode();
+            _logger.LogInformation("Uploading the episode content file.");
+            var episodeFileName = Path.GetFileName(filePath);
+            var base64Episode = Convert.ToBase64String(File.ReadAllBytes(filePath));
+            var putFile = new
+            {
+                message = $"Add {episodeFileName}",
+                content = base64Episode,
+                branch = branch,
+                commiter = new { name = "gaufung", email = "gaufung@outlook.com" }
+            };
+
+            string contentFile = "episode-" + number.PadLeft(3, '0') + ".md";
+            responseMessage = await client.PutAsync(
+            $"https://api.github.com/repos/{owner}/{repo}/contents/docs/{contentFile}",
+            new StringContent(JsonSerializer.Serialize(putFile), Encoding.UTF8, "application/json")
+            );
+            responseMessage.EnsureSuccessStatusCode();
+
+            _logger.LogInformation("Creating pull request");
+            var pr = new
+            {
+                title = $"Add episode {number}",
+                head = branch,
+                @base = "master",
+                body = $"This PR adds the episode {number} to the repository.",
+            };
+
+            responseMessage = await client.PostAsync(
+                $"https://api.github.com/repos/{owner}/{repo}/pulls",
+                new StringContent(JsonSerializer.Serialize(pr), Encoding.UTF8, "application/json")
+                );
+            responseMessage.EnsureSuccessStatusCode();
+            return branch;
         }
 
         [KernelFunction("get_issue_comment")]
