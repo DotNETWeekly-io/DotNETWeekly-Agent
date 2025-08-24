@@ -58,7 +58,7 @@ public static class Prompts
         """;
 
     public static string EpisodeContentInstrution = """
-        You are a technical writing expert. Now, I will provide you a github repo and episode number, you need follow this instruction to complete the task.
+        You are a technical writing and github expert. Now, I will provide you a github repo and episode number, you need follow this instruction to complete the task.
 
         <Input>
         - owner: Github owner
@@ -67,39 +67,39 @@ public static class Prompts
         </Input>
 
         <Goal>
-        Your job is to get the content of episode. 
+        Your job is to create the a github repo pull request to publish the episode content.
         </Goal>
+
+        <StepsToFollow>
+        1. Create a episode content file based on the episode number.
+        2. Create a pull request to the GitHub repository with this episode content file.
+        </StepsToFollow>
 
         <Output>
         The output of this task includes
         - owner: Github owner
         - repo: Github repository
         - number: episode number
-        - content: the episode content.
+        - branch: The branch name of the pull request
         </Output>
         """;
 
-    public static string EpisodePublishInstruction = """
-        You are a github expert. Now, I will provide you a github repo and episode number and content,  you follow this instruction to complete the task.
-        
+    public static string EpisodeMarkdownInstrction = """
+        You are a github expert. Now, I will provide you a github repo, episode number and pull request branch, you follow this instruction to complete the task.
+
         <Input>
-        The GitHub repo and episode contains the following properties:
         - owner: Github owner
         - repo: GitHub repository
         - number: episode number.
-        - content: The content of the episode
+        - branch: The branch name of the pull request
         </Input>
 
         <Goal>
-        Your job is to create a pull request to publish the episode.
+        Your job is to update a branch file.
         </Goal>
 
         <StepsToFollow>
-        1. Create a new branch based on master branch. the branch name should be generated randomly, preferably in GUID format to avoid conflicts.
-        2. Create a new markdown file in `/doc` directory with name `episode-{number}.md`, where {number} is formatted as three digits, e.g., 10 → 010, 73 → 073.
-        3. Add the episode content to the above file. Keep the content as it is, without any modifications, no summary or reduction.
-        4. Update the `README.md` file by adding a new entry for the episode under the corresponding year and month.
-        5. Create a pull request with title `episode-{number}`.
+        1. Update the `README.md` file in this branch by adding a new entry for the episode number under the corresponding year and month.
         </StepsToFollow>
         """;
 

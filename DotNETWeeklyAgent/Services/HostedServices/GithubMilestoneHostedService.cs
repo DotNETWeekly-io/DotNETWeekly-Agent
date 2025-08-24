@@ -55,13 +55,13 @@ public class GithubMilestoneHostedService : BackgroundService
             var sp = scope.ServiceProvider;
             var kernel = sp.GetRequiredService<Kernel>();
 
-            var episodeContentAgent = CreateEpisodeContentAgent(kernel);
-            var episodePublishAgent = CreateEpisodePublishAgent(kernel);
+            var episodeContentAndPublishAgent = CreateEpisodeContentAndPublishAgent(kernel);
+            var branchUpdateAgent = CreateBranchFileUpdateAgent(kernel);
 
             ChatHistory history = [];
 
 #pragma warning disable SKEXP0110
-            SequentialOrchestration orchestration = new(episodeContentAgent, episodePublishAgent)
+            SequentialOrchestration orchestration = new(episodeContentAndPublishAgent, branchUpdateAgent)
             {
                 ResponseCallback = responseCallback,
             };
@@ -102,7 +102,7 @@ public class GithubMilestoneHostedService : BackgroundService
         }
     }
 
-    private ChatCompletionAgent CreateEpisodeContentAgent(Kernel kernel)
+    private ChatCompletionAgent CreateEpisodeContentAndPublishAgent(Kernel kernel)
     {
         var cloneKernel = kernel.Clone();
         cloneKernel.Plugins.AddFromObject(_githubAPIService);
@@ -110,7 +110,7 @@ public class GithubMilestoneHostedService : BackgroundService
         {
             Name = "EpisodeContent",
             Instructions = Prompts.EpisodeContentInstrution,
-            Description = "An agent to create the episode content",
+            Description = "An agent to create the episode content and publish the pull request.",
             Kernel = cloneKernel,
             Arguments = new KernelArguments(OpenAIPromptExecutionSettings),
         };
@@ -118,7 +118,7 @@ public class GithubMilestoneHostedService : BackgroundService
         return episodeContentAgent;
     }
 
-    private ChatCompletionAgent CreateEpisodePublishAgent(Kernel kernel)
+    private ChatCompletionAgent CreateBranchFileUpdateAgent(Kernel kernel)
     {
         var cloneKernel = kernel.Clone();
         // Add github mcp server
@@ -148,8 +148,8 @@ public class GithubMilestoneHostedService : BackgroundService
         ChatCompletionAgent episodePublishAgent = new ChatCompletionAgent
         {
             Name = "EpisodeContent",
-            Instructions = Prompts.EpisodePublishInstruction,
-            Description = "An agent to publish the episode",
+            Instructions = Prompts.EpisodeMarkdownInstrction,
+            Description = "An agent to update a branch file.",
             Kernel = cloneKernel,
             Arguments = new KernelArguments(OpenAIPromptExecutionSettings)
         };
@@ -160,8 +160,7 @@ public class GithubMilestoneHostedService : BackgroundService
 
     private static List<McpClientTool> FilterMilestoneTools(IList<McpClientTool> tools)
     {
-        return tools.Where(tool => tool.Name.Contains("create_branch", StringComparison.OrdinalIgnoreCase) ||
-                                   tool.Name.Contains("push_files", StringComparison.OrdinalIgnoreCase) ||
+        return tools.Where(tool => tool.Name.Contains("push_files", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_or_update_file", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_pull_request", StringComparison.OrdinalIgnoreCase) ||
                                    tool.Name.Contains("create_pull_request_with_copilot", StringComparison.OrdinalIgnoreCase) ||
