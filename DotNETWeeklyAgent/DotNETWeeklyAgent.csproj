@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Scripts\webcontent_transcript.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Scripts\youtube_transcript.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
