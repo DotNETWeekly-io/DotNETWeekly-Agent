@@ -30,12 +30,12 @@ public class GithubIssueWebHookController : ControllerBase
         }
         catch (Exception)
         {
-            return NoContent();
+            return Ok("failed to parse the issue payload");
         }
 
         if (!CanIssueProceed(issuePayload))
         {
-            return NoContent();
+            return Ok("issue cannot proceed");
         }
 
         IssueMetadata issueMetadata = new IssueMetadata
@@ -51,7 +51,7 @@ public class GithubIssueWebHookController : ControllerBase
         await _backgroundTaskQueue.QueueAsync(issueMetadata);
         _logger.LogInformation("Received issue: {Owner}/{Repo}#{IssueNumber} - {Title}", 
             issueMetadata.Owner, issueMetadata.Repo, issueMetadata.IssueNumber, issueMetadata.Title);
-        return Ok();
+        return Ok("Issue task accepted");
     }
 
     private static IssueCategory ConvertIssueCategory(string title)

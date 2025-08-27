@@ -37,12 +37,12 @@ public class GithubMilestoneWebHookController : ControllerBase
         }
         catch (Exception)
         {
-            return NoContent();
+            return Ok("failed to parse the milestone payload");
         }
 
         if (milestonePayload == null || !milestonePayload.Action.Equals("created"))
         {
-            return NoContent();
+            return Ok("milestone cannot proceed");
         }
 
         int? number = ConvertMilestoneToNumber(milestonePayload.Milestone.Title);
@@ -63,7 +63,7 @@ public class GithubMilestoneWebHookController : ControllerBase
         await _backgroundTaskQueue.QueueAsync(milestoneMetadata);
         _logger.LogInformation("Received milestone: {Owner}/{Repo} - {Title} (#{Number})",
             milestoneMetadata.Owner, milestoneMetadata.Repo, milestoneMetadata.Title, milestoneMetadata.Number);
-        return Ok();
+        return Ok("Milestone creation request accpeted.");
     }
 
     private static int? ConvertMilestoneToNumber(string title)

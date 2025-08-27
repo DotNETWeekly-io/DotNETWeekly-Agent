@@ -129,7 +129,7 @@ public class GithubIssueHostedService : BackgroundService
         var result = await orchestration.InvokeAsync(
     $"Can you add this summary of this github issue link? {input}", runtime);
 
-        string output = await result.GetValueAsync(TimeSpan.FromMinutes(20));
+        string output = await result.GetValueAsync(TimeSpan.FromMinutes(5));
         _logger.LogInformation($"# RESULT: {output}");
         _logger.LogInformation("ORCHESTRATION HISTORY");
         foreach (ChatMessageContent message in history)
