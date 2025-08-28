@@ -1,3 +1,5 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+
 using DotNETWeeklyAgent;
 using DotNETWeeklyAgent.Extensions;
 using DotNETWeeklyAgent.Models;
@@ -22,7 +24,10 @@ builder.Services.AddSwaggerGen(options =>
 #endif
 
 #if !DEBUG
-builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
+{
+    options.Credential = new Azure.Identity.DefaultAzureCredential();
+});
 #endif
 builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
