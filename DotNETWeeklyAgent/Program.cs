@@ -24,10 +24,8 @@ builder.Services.AddSwaggerGen(options =>
 #endif
 
 #if !DEBUG
-builder.Services.AddOpenTelemetry().UseAzureMonitor(options =>
-{
-    options.Credential = new Azure.Identity.DefaultAzureCredential();
-});
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
+builder.Logging.AddOpenTelemetry();
 #endif
 builder.Services.AddLogging(config => config.AddDebug().SetMinimumLevel(LogLevel.Information));
 builder.Services.AddSingleton<IBackgroundTaskQueue<IssueMetadata>, BackgroundTaskQueue<IssueMetadata>>();
