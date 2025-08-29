@@ -5,7 +5,6 @@ using Microsoft.SemanticKernel;
 using Readability;
 
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace DotNETWeeklyAgent.Services;
 
@@ -23,41 +22,17 @@ public class WebContentService
 
     [KernelFunction("get_web_link_content")]
     [Description("get web content by the web link. It's designed for article and news category issue.")]
-    public string GetWebContent(string link)
+    public async Task<string> GetWebContent(string link)
     {
         _logger.LogInformation("Getting web content for link: {link}", link);
 
         try
         {
-            string exePath = "./Scripts/webcontent_transcript.exe";
-            string arguments = link;
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = exePath,
-                Arguments = arguments,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                CreateNoWindow = true,
-            };
-
-            using var process = new Process { StartInfo = startInfo };
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            if (process.ExitCode != 0)
-            {
-                _logger.LogError("Failed to get the web content with error: {error}", error);
-                return $"Unable to get web content with error {error}. Stop proceeding";
-            }
-            else
-            {
-                return output;
-            }
+            SmartReader.Reader sr = new SmartReader.Reader(link);
+            sr.Debug = true;
+            sr.LoggerDelegate = (msg) => _logger.LogInformation(msg);
+            SmartReader.Article article = await sr.GetArticleAsync();
+            return article.Content;
         }
         catch (Exception ex)
         {
