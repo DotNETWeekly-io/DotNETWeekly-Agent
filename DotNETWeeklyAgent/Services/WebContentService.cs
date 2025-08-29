@@ -32,7 +32,7 @@ public class WebContentService
             sr.Debug = true;
             sr.LoggerDelegate = (msg) => _logger.LogInformation(msg);
             SmartReader.Article article = await sr.GetArticleAsync();
-            return article.Content;
+            return article.TextContent;
         }
         catch (Exception ex)
         {
