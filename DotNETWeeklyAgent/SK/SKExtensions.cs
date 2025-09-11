@@ -1,14 +1,9 @@
 ﻿using Azure.Identity;
 
-using DotNETWeeklyAgent.MCPs;
 using DotNETWeeklyAgent.Options;
-using DotNETWeeklyAgent.Services;
 
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
-
-using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol;
 
 namespace DotNETWeeklyAgent.SK;
 

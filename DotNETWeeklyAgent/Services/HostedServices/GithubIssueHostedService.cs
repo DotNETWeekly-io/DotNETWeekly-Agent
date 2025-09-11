@@ -13,7 +13,7 @@ using System.Text.Json;
 
 namespace DotNETWeeklyAgent.Services.HostedServices;
 
-public class GithubIssueHostedService : BackgroundService
+public sealed class GithubIssueHostedService : BackgroundService
 {
     private readonly ILogger<GithubIssueHostedService> _logger;
 

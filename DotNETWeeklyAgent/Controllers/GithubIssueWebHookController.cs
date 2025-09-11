@@ -40,7 +40,7 @@ public class GithubIssueWebHookController : ControllerBase
 
         IssueMetadata issueMetadata = new IssueMetadata
         {
-            Action = issuePayload.Action,
+            Action = issuePayload!.Action,
             Owner = issuePayload.Organization.Login,
             Repo = issuePayload.Repository.Name,
             IssueNumber = issuePayload.Issue.Number,

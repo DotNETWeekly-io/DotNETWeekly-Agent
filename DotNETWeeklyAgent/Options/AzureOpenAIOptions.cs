@@ -1,6 +1,6 @@
 ﻿namespace DotNETWeeklyAgent.Options;
 
-public class AzureOpenAIOptions
+public sealed class AzureOpenAIOptions
 {
     public  required string DeploymentName { get; set; }
 

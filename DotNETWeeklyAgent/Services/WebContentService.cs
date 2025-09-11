@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace DotNETWeeklyAgent.Services;
 
-public class WebContentService
+public sealed class WebContentService
 {
     private readonly IHttpClientFactory _httpClientFactory;
 

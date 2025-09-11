@@ -1,6 +1,6 @@
 ﻿namespace DotNETWeeklyAgent.Options;
 
-public class GithubOptions
+public sealed class GithubOptions
 {
     public required string APIUrl { get; set; }
 

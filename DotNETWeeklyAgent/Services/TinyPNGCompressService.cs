@@ -6,7 +6,7 @@ using TinyPng;
 
 namespace DotNETWeeklyAgent.Services;
 
-public class TinyPNGCompressService
+public sealed class TinyPNGCompressService
 {
     private readonly TinyPNGOptions _tinyPNGOptions;
 

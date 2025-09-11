@@ -3,7 +3,7 @@ using System.Text;
 
 namespace DotNETWeeklyAgent.Services;
 
-public class SecretTokenValidator : ISecretTokenValidator
+public sealed class SecretTokenValidator : ISecretTokenValidator
 {
     public async Task<bool> Validate(HttpContext httpContext, string secretToken)
     {

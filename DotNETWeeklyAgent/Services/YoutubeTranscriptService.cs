@@ -30,7 +30,7 @@ public sealed class YoutubeTranscriptService
             return "The youtube video is not valid. Stop proceeding";
         }
 
-        string id = queryParams["v"];
+        string? id = queryParams["v"];
 
         if (!string.IsNullOrWhiteSpace(id))
         {

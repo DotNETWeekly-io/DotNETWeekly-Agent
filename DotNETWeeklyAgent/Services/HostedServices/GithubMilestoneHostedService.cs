@@ -17,7 +17,7 @@ using System.Text.Json;
 
 namespace DotNETWeeklyAgent.Services.HostedServices;
 
-public class GithubMilestoneHostedService : BackgroundService
+public sealed class GithubMilestoneHostedService : BackgroundService
 {
     private readonly ILogger<GithubMilestoneHostedService> _logger;
     private readonly IBackgroundTaskQueue<MilestoneMetadata> _taskQueue;

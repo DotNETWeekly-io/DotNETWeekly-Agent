@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace DotNETWeeklyAgent.Services;
 
-public class BackgroundTaskQueue<T> : IBackgroundTaskQueue<T>
+public sealed class BackgroundTaskQueue<T> : IBackgroundTaskQueue<T>
 {
     private readonly Channel<T> _queue;
 

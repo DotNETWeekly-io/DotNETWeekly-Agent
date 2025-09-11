@@ -12,7 +12,7 @@ using System.ComponentModel;
 
 namespace DotNETWeeklyAgent.Services;
 
-public class ImageGenerationService
+public sealed class ImageGenerationService
 {
     private readonly TinyPNGCompressService _tinyPNGCompressService;
 
